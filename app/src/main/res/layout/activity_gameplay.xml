@@ -16,10 +16,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!--<RelativeLayout-->
+    <!--<rs.ac.bg.etf.ki150362.socceriscoming.activities.SoccerLogicView-->
         <!--android:id="@+id/layout_soccerlogic"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="match_parent">-->
-    <!--</RelativeLayout>-->
+    <!--</rs.ac.bg.etf.ki150362.socceriscoming.activities.SoccerLogicView>-->
+
+    <rs.ac.bg.etf.ki150362.socceriscoming.activities.SoccerLogicSurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </RelativeLayout>
