@@ -1,6 +1,7 @@
 package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 
 import java.util.Random;
@@ -9,11 +10,9 @@ public class Player extends Sprite {
 
     // intelligence
     private Random random = new Random();
-    private int directionX, directionY;
     private float speed = 0.60f;
 
-    private float vx, vy;
-    private float ax, ay;
+    private boolean hasFocus;
 
     public void setPosition(float x, float y) {
         setX(x-getRect().centerX());
@@ -21,46 +20,14 @@ public class Player extends Sprite {
     }
 
     public void safeSetPosition(float x, float y) {
-        safeSetX(x - getRect().centerX());
-        safeSetY(y - getRect().centerY());
+        safeSetX(x-getRect().centerX());
+        safeSetY(y-getRect().centerY());
     }
 
-    public void update(long elapsed, Ball ball) {
+    public void updateWithIntelligence(long elapsed, Ball ball) {
 
         setX(decisionLogicX(elapsed, ball));
         setY(decisionLogicY(elapsed, ball));
-    }
-
-    public void update(long elapsed) {
-
-        // no moving
-        if (vx < 0.0001f && vy < 0.0001f) return;
-        vx *= 0.88f;
-        vy *= 0.88f;
-
-        float x = getX();
-        float y = getY();
-
-        Rect screenRect = getScreenRect();
-
-        if (screenRect.left <= 0) {
-            directionX = 1;
-        } else if (screenRect.right >= getScreenWidth()) {
-            directionX = -1;
-        }
-
-        if (screenRect.top <= 0) {
-            directionY = 1;
-        } else if (screenRect.bottom >= getScreenHeight()) {
-            directionY = -1;
-        }
-
-        x += directionX * vx * elapsed;
-        y += directionY * vy * elapsed;
-
-        setX(x);
-        setY(y);
-
     }
 
     private float decisionLogicX(long elapsed, Ball ball) {
@@ -139,6 +106,7 @@ public class Player extends Sprite {
         super(screenWidth, screenHeight);
 
         this.position = position;
+
     }
 
     @Override
@@ -157,37 +125,31 @@ public class Player extends Sprite {
         directionY = random.nextInt(2)*2-1;
     }
 
-    public float getVx() {
-        return vx;
+    public void init(Bitmap image, int index) {
+        super.init(image);
+
+        if(position == Position.HOME) {
+            setX(margin + (index % 2) * margin * 0.75f);
+        } else {
+            setX(getScreenWidth() - margin - (index % 2) * margin * 0.75f - getRect().centerX());
+        }
+        setY(getScreenHeight() / 2 - getRect().centerY() + (1 - index) * margin * 1.2f);
     }
 
-    public void setVx(float vx) {
-        this.vx = Math.abs(vx);
-        directionX = vx < 0 ? -1 : 1;
+    @Override
+    public void draw(Canvas canvas) {
+        if (hasFocus) {
+            drawHighlighted(canvas);
+            return;
+        }
+        super.draw(canvas);
     }
 
-    public float getVy() {
-        return vy;
+    public boolean isInFocus() {
+        return hasFocus;
     }
 
-    public void setVy(float vy) {
-        this.vy = Math.abs(vy);
-        directionY = vy < 0 ? -1 : 1;
-    }
-
-    public float getAx() {
-        return ax;
-    }
-
-    public void setAx(float ax) {
-        this.ax = ax;
-    }
-
-    public float getAy() {
-        return ay;
-    }
-
-    public void setAy(float ay) {
-        this.ay = ay;
+    public void setInFocus(boolean hasFocus) {
+        this.hasFocus = hasFocus;
     }
 }

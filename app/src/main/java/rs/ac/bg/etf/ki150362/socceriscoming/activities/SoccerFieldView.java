@@ -3,6 +3,7 @@ package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 public class SoccerFieldView extends View {
@@ -10,22 +11,46 @@ public class SoccerFieldView extends View {
     private Paint paint = new Paint();
     private int width, height;
 
+    private RectF homeGoal, oppositeGoal;
+
     public SoccerFieldView(Context context) {
+
         super(context);
+
+        homeGoal = new RectF(0, height * 0.3f, width * 0.10f, height * 0.7f);
+        oppositeGoal = new RectF(width * 0.9f, height * 0.3f, width, height * 0.7f);
     }
 
     public SoccerFieldView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
+    public int getSoccerFieldWidth() {
+        return width;
+    }
+
+    public int getSoccerFieldHeight() {
+        return height;
+    }
+
+    public RectF getHomeGoal() {
+        return homeGoal;
+    }
+
+    public RectF getOppositeGoal() {
+        return oppositeGoal;
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        Log.d("SoccerFieldView", "onSizeChanged called");
         width = w;
         height = h;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+        Log.d("SoccerFieldView", "onDraw called");
         paint.setColor(Color.WHITE);
         paint.setStrokeWidth(8);
         paint.setStyle(Paint.Style.STROKE);
@@ -48,7 +73,8 @@ public class SoccerFieldView extends View {
         canvas.drawRect(0, height * 0.15f, width * 0.18f, height * 0.85f, paint);
 
         // home goal box
-        canvas.drawRect(0, height * 0.3f, width * 0.10f, height * 0.7f, paint);
+        homeGoal = new RectF(0, height * 0.3f, width * 0.10f, height * 0.7f);
+        canvas.drawRect(homeGoal, paint);
 
         // home goal
         paint.setStrokeWidth(30);
@@ -68,7 +94,8 @@ public class SoccerFieldView extends View {
         canvas.drawRect(width * 0.82f, height * 0.15f, width, height * 0.85f, paint);
 
         // away goal box
-        canvas.drawRect(width * 0.9f, height * 0.3f, width, height * 0.7f, paint);
+        oppositeGoal = new RectF(width * 0.9f, height * 0.3f, width, height * 0.7f);
+        canvas.drawRect(oppositeGoal, paint);
 
         // away goal
         paint.setStrokeWidth(30);
