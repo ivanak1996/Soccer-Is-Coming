@@ -25,7 +25,7 @@ public class TeamSpinnerAdapter extends ArrayAdapter<String> {
 
     }
 
-    /*@Override
+    @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         return getCustomView(position, convertView, parent);
     }
@@ -46,5 +46,5 @@ public class TeamSpinnerAdapter extends ArrayAdapter<String> {
         imageView.setImageResource(imageArray[position]);
 
         return row;
-    }*/
+    }
 }

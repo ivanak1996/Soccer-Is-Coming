@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background_westeros"
+    tools:context=".activities.settings.SettingsActivity">
+
+    <ImageButton
+        android:onClick="onClickGoBack"
+        android:tint="#FFFFFF"
+        android:id="@+id/imagebutton_about"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_back"
+        android:backgroundTint="#0000"
+        android:layout_gravity="left"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingTop="12dp"
+        android:paddingLeft="32dp"
+        android:paddingRight="32dp"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="4"
+                android:fontFamily="@font/got"
+                android:text="Terrain"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <Spinner
+                android:id="@+id/spinner_terrain"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="7"
+                android:fontFamily="@font/got"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:spinnerMode="dialog"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:paddingBottom="8dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:fontFamily="@font/got"
+                android:text="GOALS TO WIN"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupGoalsNumber"
+                android:checkedButton="@id/radio3goals"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" >
+
+                <RadioButton
+                    android:id="@+id/radio3goals"
+                    android:textSize="24sp"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="@font/got"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="3" />
+
+                <RadioButton
+                    android:id="@+id/radio5goals"
+                    android:textSize="24sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/got"
+                    android:text="5"
+                    android:textColor="#FFFFFF" />
+
+                <RadioButton
+                    android:id="@+id/radio10goals"
+                    android:textSize="24sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="false"
+                    android:fontFamily="@font/got"
+                    android:text="10"
+                    android:textColor="#FFFFFF" />
+            </RadioGroup>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:paddingBottom="8dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+
+            <TextView
+                android:textColor="#FFFFFF"
+                android:layout_weight="1"
+                android:text="Level"
+                android:fontFamily="@font/got"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <RadioGroup
+                android:id="@+id/radioGroupLevel"
+                android:checkedButton="@id/radioLevelMedium"
+                android:layout_weight="2"
+                android:orientation="horizontal"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" >
+
+                <RadioButton
+                    android:id="@+id/radioLevelEasy"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="@font/got"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="easy" />
+
+                <RadioButton
+                    android:id="@+id/radioLevelMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/got"
+                    android:text="medium"
+                    android:textColor="#FFFFFF" />
+
+                <RadioButton
+                    android:id="@+id/radioLevelHard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="false"
+                    android:fontFamily="@font/got"
+                    android:text="hard"
+                    android:textColor="#FFFFFF" />
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <Button
+            android:onClick="onClickSaveSettings"
+            android:layout_gravity="center"
+            android:text="Save"
+            style="@style/medieval_button"
+            android:layout_marginTop="24dp"
+            android:layout_width="300dp"
+            android:layout_height="75dp"
+            android:textSize="24sp" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
