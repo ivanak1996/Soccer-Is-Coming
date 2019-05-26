@@ -62,7 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setSharedPreferences() {
-        
+
         SharedPreferences.Editor editor = getSharedPreferences(PREFERENCES_GOT_SETTINGS, MODE_PRIVATE).edit();
         editor.putString(PREFERENCE_TERRAIN, spinner.getSelectedItem().toString());
         editor.putInt(PREFERENCE_GAMELEVEL, gameLevelRadioGroup.getCheckedRadioButtonId());

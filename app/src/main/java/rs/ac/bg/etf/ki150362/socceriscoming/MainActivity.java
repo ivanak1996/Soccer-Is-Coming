@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.GameplayActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.settings.SettingsActivity;
+import rs.ac.bg.etf.ki150362.socceriscoming.activities.statistics.StatisticsActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.fragments.HomeScreenFragment;
 import rs.ac.bg.etf.ki150362.socceriscoming.fragments.NewGameFragment;
 import rs.ac.bg.etf.ki150362.socceriscoming.util.asynctasks.EnterFullScreenAsyncTask;
@@ -180,5 +181,10 @@ public class MainActivity extends AppCompatActivity {
             String message = data.getStringExtra(EXTRA_SETTINGS_MESSAGE);
             if(message != null) Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void onClickOpenStatistics(View view) {
+        Intent intent = new Intent(this, StatisticsActivity.class);
+        startActivity(intent);
     }
 }
