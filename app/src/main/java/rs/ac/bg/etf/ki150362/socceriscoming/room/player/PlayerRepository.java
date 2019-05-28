@@ -11,11 +11,13 @@ import rs.ac.bg.etf.ki150362.socceriscoming.room.GameDatabase;
 public class PlayerRepository {
     private PlayerDao playerDao;
     private LiveData<List<Player>> allPlayers;
+    private LiveData<List<String>> allPlayersNames;
 
     public PlayerRepository(Application application) {
         GameDatabase database = GameDatabase.getInstance(application);
         playerDao = database.playerDao();
         allPlayers = playerDao.getAllPlayers();
+        allPlayersNames = playerDao.getAllPlayersNames();
     }
 
     public void insert(Player player) {
@@ -24,6 +26,10 @@ public class PlayerRepository {
 
     public LiveData<List<Player>> getAllPlayers() {
         return allPlayers;
+    }
+
+    public LiveData<List<String>> getAllPlayersNames() {
+        return allPlayersNames;
     }
 
     private static class InsertUserAsyncTask extends AsyncTask<Player, Void, Void> {

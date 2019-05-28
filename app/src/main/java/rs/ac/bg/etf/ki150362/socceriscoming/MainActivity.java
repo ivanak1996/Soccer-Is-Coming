@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.GameplayActivity;
@@ -27,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int REQ_CODE_SETTINGS_ACTIVITY = 128;
     public static final String EXTRA_SETTINGS_MESSAGE = "EXTRA_SETTINGS_MESSAGE";
+    public static final String EXTRA_HOME_PLAYER_NAME = "EXTRA_HOME_PLAYER_NAME";
+    public static final String EXTRA_GUEST_PLAYER_NAME = "EXTRA_GUEST_PLAYER_NAME";
+    public static final String EXTRA_HOME_PLAYER_DRAWABLE = "EXTRA_HOME_PLAYER_DRAWABLE";
+    public static final String EXTRA_GUEST_PLAYER_DRAWABLE = "EXTRA_GUEST_PLAYER_DRAWABLE";
 
     private boolean mIsBound = false;
     private HomeScreenFragment homeScreenFragment;
@@ -145,7 +151,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playGameOnClick(View view) {
+
+        String player1Name = ((AutoCompleteTextView)findViewById(R.id.autocomplete_player1name)).getText().toString();
+        String player2Name = ((AutoCompleteTextView)findViewById(R.id.autocomplete_player2name)).getText().toString();
+
+        int player1TeamIndex = ((Spinner) findViewById(R.id.spinner_player1)).getSelectedItemPosition();
+        int player1DrawableId = NewGameFragment.images[player1TeamIndex];
+
+        int player2TeamIndex = ((Spinner) findViewById(R.id.spinner_player2)).getSelectedItemPosition();
+        int player2DrawableId = NewGameFragment.images[player2TeamIndex];
+
         Intent gameplayIntent = new Intent(MainActivity.this, GameplayActivity.class);
+
+        gameplayIntent.putExtra(EXTRA_HOME_PLAYER_NAME, player1Name);
+        gameplayIntent.putExtra(EXTRA_GUEST_PLAYER_NAME, player2Name);
+        gameplayIntent.putExtra(EXTRA_HOME_PLAYER_DRAWABLE, player1DrawableId);
+        gameplayIntent.putExtra(EXTRA_GUEST_PLAYER_DRAWABLE, player2DrawableId);
+
         MainActivity.this.startActivity(gameplayIntent);
     }
 

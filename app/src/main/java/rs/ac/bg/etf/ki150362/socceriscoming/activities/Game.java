@@ -1,19 +1,14 @@
 package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
+import android.graphics.*;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
+import android.view.*;
 
 import java.util.LinkedList;
+import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
 
@@ -21,6 +16,8 @@ import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
 public class Game {
+
+    //  region Collision Strategies
 
     interface CollisionStrategy {
         void detectCollision(Sprite player1, Sprite player2);
@@ -49,9 +46,6 @@ public class Game {
 
                 float newOpponentX = player2.getX() + overlap * (player1.getX() - player2.getX()) / distance;
                 float newOpponentY = player2.getY() + overlap * (player1.getY() - player2.getY()) / distance;
-
-//            player.safeSetX(newPlayerX);
-//            player.safeSetY(newPlayerY);
 
                 player1.safeSetX(newPlayerX);
                 player1.safeSetY(newPlayerY);
@@ -119,95 +113,156 @@ public class Game {
         }
     };
 
-    private SoccerFieldView soccerFieldView;
-    private SurfaceHolder surfaceHolder;
+    //  endregion
+
+    // region Graphics
+
     private Resources resources;
+    private SurfaceHolder surfaceHolder;
 
-    private Paint textPaint = new Paint();
+    private Bitmap homePlayerImageScore;
+    private Bitmap guestPlayerImageScore;
 
-    private Player inTouchableFocus = null, inFocus = null;
-    private int touchedX, touchedY;
-    private long touchedTime;
+    private Typeface gameOfThronesTypeface;
 
-    private Ball ball;
+    private Paint playerWithTurnTextPaint = new Paint();
+    private Paint playerWithoutTurnTextPaint = new Paint();
+    private Paint playerWithTurnAlphaPaint = new Paint();
+    private Paint playerWithoutTurnAlphaPaint = new Paint();
+    private Paint timeElapsedPaint = new Paint();
+
+
+    private Bitmap homeTeamImage, opponentTeamImage, ballImage;
+    private int homePlayerDrawableId, guestPlayerDrawableId;
+
+    // endregion
+
+    // region Fields
+
+    // TODO refactor opponent to guest everywhere
     private Team homeTeam, opponentTeam;
     private Team turn;
 
+    private Player inTouchableFocus = null;
+    private Player inFocus = null;
+
+    private Ball ball;
+
+    private SoccerFieldView soccerFieldView;
+
+    private int actionDownX, actionDownY;
+    private long actionDownTime;
+
     private CollisionStrategy collisionStrategy = staticCollisionStrategy;
 
-    private Bitmap homeTeamImage, opponentTeamImage, ballImage;
+    private String homePlayerName, guestPlayerName;
 
-//    private Player homePlayer;
-//    private Player opponentPlayer;
+    private long lastTurnSwitchTime;
+    private long gameStartedTime;
 
     private LinkedList<Player> players = new LinkedList<>();
 
-    public Game(SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources) {
+    // endregion
+
+    public Game(SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources,
+                String homePlayerName, String guestPlayerName,
+                int homePlayerDrawableId, int guestPlayerDrawableId,
+                Typeface gameOfThronesTypeface) {
 
         this.soccerFieldView = soccerFieldView;
         this.surfaceHolder = surfaceHolder;
         this.resources = resources;
 
+        this.homePlayerName = homePlayerName;
+        this.guestPlayerName = guestPlayerName;
+
+        this.homePlayerDrawableId = homePlayerDrawableId;
+        this.guestPlayerDrawableId = guestPlayerDrawableId;
+
+        this.gameOfThronesTypeface = gameOfThronesTypeface;
+
         ball = new Ball(soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
-//        homePlayer = new Player(soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight(), Player.Position.HOME);
-//        opponentPlayer = new Player(soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight(), Player.Position.OPPONENT);
         homeTeam = new Team(Player.Position.HOME, soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
         opponentTeam = new Team(Player.Position.OPPONENT, soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
 
-        turn = homeTeam;
+        setTurn(homeTeam);
 
         players.addAll(homeTeam.getPlayers());
         players.addAll(opponentTeam.getPlayers());
 
-        Sprite.highlight = Bitmap
-                .createScaledBitmap(BitmapFactory
-                        .decodeResource(resources, R.drawable.player_shadow),
-                        360,360,false);
+        setupGraphics();
 
-        textPaint.setARGB(200, 254, 0, 0);
-        textPaint.setTextSize(100);
+        gameStartedTime = System.currentTimeMillis();
     }
 
+    // sets up the game
     public void init() {
 
-        Bitmap ballImage  = BitmapFactory.decodeResource(resources, R.drawable.ball_dragon);
+        Bitmap ballImage = BitmapFactory.decodeResource(resources, R.drawable.ball_dragon);
         ballImage = Bitmap.createScaledBitmap(ballImage, 100, 100, false);
         this.ballImage = ballImage;
 
-        Bitmap homePlayerImage  = BitmapFactory.decodeResource(resources, R.drawable.player_baratheon);
+        Bitmap homePlayerImage = BitmapFactory.decodeResource(resources, homePlayerDrawableId);
         homePlayerImage = Bitmap.createScaledBitmap(homePlayerImage, 200, 200, false);
         this.homeTeamImage = homePlayerImage;
 
-        Bitmap opponentPlayerImage  = BitmapFactory.decodeResource(resources, R.drawable.player_martell);
+        Bitmap opponentPlayerImage = BitmapFactory.decodeResource(resources, guestPlayerDrawableId);
         opponentPlayerImage = Bitmap.createScaledBitmap(opponentPlayerImage, 200, 200, false);
         this.opponentTeamImage = opponentPlayerImage;
 
         ball.init(ballImage);
         homeTeam.init(homePlayerImage);
         opponentTeam.init(opponentPlayerImage);
-//        homePlayer.init(homePlayerImage);
-//        opponentPlayer.init(opponentPlayerImage);
     }
 
-    public void switchTurn() {
-        if (turn == null) return;
-        if (turn == homeTeam) {
-            turn = opponentTeam;
-        } else {
-            turn = homeTeam;
+    // sets up the game that has been reloaded
+    public void reload(GameState gameState) {
+
+        if (gameState != null) {
+
+            homePlayerDrawableId = gameState.homePlayerDrawableId;
+            guestPlayerDrawableId = gameState.guestPlayerDrawableId;
+
+            init();
+
+            gameStartedTime = gameState.timeElapsed;
+            homePlayerName = gameState.homePlayerName;
+            guestPlayerName = gameState.guestPlayerName;
+
+            homeTeam.setScore(gameState.homePlayerScore);
+            opponentTeam.setScore(gameState.guestPlayerScore);
+
+            for (int i = 0; i < Team.NUMBER_OF_PLAYERS; i++) {
+
+                homeTeam.getPlayers().get(i).setX(gameState.homePlayersCoordinates[i][0]);
+                homeTeam.getPlayers().get(i).setY(gameState.homePlayersCoordinates[i][1]);
+
+                homeTeam.getPlayers().get(i).setVxVector(gameState.homePlayersVelocities[i][0]);
+                homeTeam.getPlayers().get(i).setVyVector(gameState.homePlayersVelocities[i][1]);
+
+                opponentTeam.getPlayers().get(i).setX(gameState.guestPlayersCoordinates[i][0]);
+                opponentTeam.getPlayers().get(i).setY(gameState.guestPlayersCoordinates[i][1]);
+
+                opponentTeam.getPlayers().get(i).setVxVector(gameState.guestPlayersVelocities[i][0]);
+                opponentTeam.getPlayers().get(i).setVyVector(gameState.guestPlayersVelocities[i][1]);
+
+            }
+
+            turn = gameState.homePlayersTurn ? homeTeam : opponentTeam;
+
+            ball.setX(gameState.ballX);
+            ball.setY(gameState.ballY);
+
+            ball.setVxVector(gameState.ballVx);
+            ball.setVyVector(gameState.ballVy);
+
+        }
+        else {
+            init();
         }
     }
 
     public void update(long elapsed) {
-
-//        TODO: implement collision detection
-//        if(homePlayer.getScreenRect().contains(ball.getScreenRect().left, ball.getScreenRect().centerY())){
-//            ball.moveRight();
-//        } else if (opponentPlayer.getScreenRect().contains(ball.getScreenRect().right, ball.getScreenRect().centerY())){
-//            ball.moveLeft();
-//        }
-
-        // HashSet<Pair<Player, Player>> colidedPairs = new HashSet<>();
 
         for(Player player1 : players) {
             for(Player player2: players) {
@@ -219,13 +274,11 @@ public class Game {
             collisionStrategy.detectCollision(player1, ball);
         }
 
-        // detectCollisionDynamic(homePlayer, opponentPlayer);
-
         ball.setScreenWidth(soccerFieldView.getSoccerFieldWidth());
         ball.update(elapsed);
 
         for(Player player:players){
-            player.setScreenWidth(soccerFieldView.getSoccerFieldWidth());
+            //player.setScreenWidth(soccerFieldView.getSoccerFieldWidth());
             player.update(elapsed);
         }
 
@@ -239,13 +292,14 @@ public class Game {
             }
         }
 
-//        ball.update(elapsed);
-//        homePlayer.update(elapsed);
-//        opponentPlayer.update(elapsed);
-        // opponentPlayer.update(elapsed, ball);
+        if(System.currentTimeMillis() - lastTurnSwitchTime > 5000) {
+            switchTurn();
+        }
+
     }
 
-    public void reinit() {
+    // reset all players and ball to the default position
+    private void reinit() {
 
         homeTeam.init(homeTeamImage);
         opponentTeam.init(opponentTeamImage);
@@ -270,26 +324,111 @@ public class Game {
 
             ball.draw(canvas);
             for(Player player:players) {
-                player.draw(canvas);
+                if(turn.getPlayers().contains(player))
+                    player.draw(canvas);
+                else
+                    player.drawGrayscale(canvas);
             }
-//            homePlayer.draw(canvas);
-//            opponentPlayer.draw(canvas);
 
-            canvas.drawText("home " + homeTeam.getScore() + " : guest " + opponentTeam.getScore(), 50, 100, textPaint);
+            // score
+
+            Paint homePlayerTextPaint = turn == homeTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
+            Paint guestPlayerTextPaint = turn == opponentTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
+
+            Paint homePlayerAlphaPaint = turn == homeTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
+            Paint guestPlayerAlphaPaint = turn == opponentTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
+
+            String homePlayerResultText = homePlayerName + " " + homeTeam.getScore();
+            String guestTeamResultText = opponentTeam.getScore() + " " + guestPlayerName;
+
+            Rect textBounds = new Rect();
+            guestPlayerTextPaint.getTextBounds(guestTeamResultText, 0, guestTeamResultText.length(), textBounds);
+
+            canvas.drawBitmap(homePlayerImageScore, 0, canvas.getHeight() - homePlayerImageScore.getHeight(), homePlayerAlphaPaint);
+            canvas.drawBitmap(guestPlayerImageScore, canvas.getWidth() - guestPlayerImageScore.getWidth(), canvas.getHeight() - guestPlayerImageScore.getHeight(), guestPlayerAlphaPaint);
+
+            canvas.drawText(homePlayerResultText, 50, canvas.getHeight() - 50, homePlayerTextPaint);
+            canvas.drawText(guestTeamResultText, canvas.getWidth()-textBounds.width()-50, canvas.getHeight() - 50, guestPlayerTextPaint);
+
+            //time
+            long elapsed = System.currentTimeMillis() - gameStartedTime;
+
+            @SuppressLint("DefaultLocale")
+            String timeElapsedString = String.format("%02d:%02d",
+                    TimeUnit.MILLISECONDS.toMinutes(elapsed) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(elapsed)),
+                    TimeUnit.MILLISECONDS.toSeconds(elapsed) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(elapsed)));
+
+            Log.d("elapsed", timeElapsedString);
+
+            Rect timeElapsedTextBounds = new Rect();
+            timeElapsedPaint.getTextBounds("00:00", 0,timeElapsedString.length(), timeElapsedTextBounds);
+
+            canvas.drawText(timeElapsedString, 40, 80, timeElapsedPaint);
 
             surfaceHolder.unlockCanvasAndPost(canvas);
+
         }
     }
+
+    public void saveGame(Context context) {
+
+        GameState gameState = new GameState();
+
+        gameState.timeElapsed = gameStartedTime; //TODO change this
+
+        gameState.homePlayerName = this.homePlayerName;
+        gameState.guestPlayerName = this.guestPlayerName;
+
+        gameState.homePlayerScore = this.homeTeam.getScore();
+        gameState.guestPlayerScore = this.opponentTeam.getScore();
+
+        float[][] homePlayersCoordinates = new float[Team.NUMBER_OF_PLAYERS][2];
+        float[][] guestPlayersCoordinates = new float[Team.NUMBER_OF_PLAYERS][2];
+        float[][] homePlayersVelocities = new float[Team.NUMBER_OF_PLAYERS][2];
+        float[][] guestPlayersVelocities = new float[Team.NUMBER_OF_PLAYERS][2];
+
+        for(int i=0; i< Team.NUMBER_OF_PLAYERS; i++) {
+
+            homePlayersCoordinates[i][0] = homeTeam.getPlayers().get(i).getX();
+            homePlayersCoordinates[i][1] = homeTeam.getPlayers().get(i).getY();
+
+            homePlayersVelocities[i][0] = homeTeam.getPlayers().get(i).getVxVector();
+            homePlayersVelocities[i][1] = homeTeam.getPlayers().get(i).getVyVector();
+
+            guestPlayersCoordinates[i][0] = opponentTeam.getPlayers().get(i).getX();
+            guestPlayersCoordinates[i][1] = opponentTeam.getPlayers().get(i).getY();
+
+            guestPlayersVelocities[i][0] = opponentTeam.getPlayers().get(i).getVxVector();
+            guestPlayersVelocities[i][1] = opponentTeam.getPlayers().get(i).getVyVector();
+
+        }
+
+        gameState.homePlayersCoordinates = homePlayersCoordinates;
+        gameState.homePlayersVelocities = homePlayersVelocities;
+
+        gameState.guestPlayersCoordinates = guestPlayersCoordinates;
+        gameState.guestPlayersVelocities = guestPlayersVelocities;
+
+        gameState.homePlayersTurn = turn == homeTeam;
+
+        gameState.ballX = ball.getX();
+        gameState.ballY = ball.getY();
+        gameState.ballVx = ball.getVxVector();
+        gameState.ballVy = ball.getVyVector();
+
+        gameState.homePlayerDrawableId = this.homePlayerDrawableId;
+        gameState.guestPlayerDrawableId = this.guestPlayerDrawableId;
+
+        gameState.saveGame(context);
+    }
+
 
     public void onTouchEvent(MotionEvent event) {
 
         int x = (int)event.getX();
         int y = (int)event.getY();
-
-//        if(!homePlayer.getScreenRect().contains(x, y)) {
-//            Log.d("onTouchEvent", "homePlayer does not contain the event");
-//            return;
-//        }
 
         switch(event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -304,9 +443,9 @@ public class Game {
                         player.setInFocus(true);
                     }
                 }
-                touchedX = x;
-                touchedY = y;
-                touchedTime = System.currentTimeMillis();
+                actionDownX = x;
+                actionDownY = y;
+                actionDownTime = System.currentTimeMillis();
                 collisionStrategy = staticCollisionStrategy;
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -315,23 +454,65 @@ public class Game {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(turn == null || inTouchableFocus == null) return;
-                inTouchableFocus.safeSetPosition(x, y);
+//                if(turn == null || inTouchableFocus == null) return;
+//                inTouchableFocus.safeSetPosition(x, y);
                 break;
             case MotionEvent.ACTION_UP:
                 if(turn == null || inTouchableFocus == null) return;
                 long releaseTime = System.currentTimeMillis();
-                Log.d("onTouchEvnt up action", ""+(releaseTime - touchedTime));
-                float offsetX = x - touchedX;
-                float offsetY = y - touchedY;
-                float moveDuration = releaseTime - touchedTime;
+                Log.d("onTouchEvnt up action", ""+(releaseTime - actionDownTime));
+                float offsetX = x - actionDownX;
+                float offsetY = y - actionDownY;
+                float moveDuration = releaseTime - actionDownTime;
                 Log.d("ACTION UP", "duration = " + moveDuration + " offsetX = " + offsetX + " offsetY = " + offsetY);
-                inTouchableFocus.setVxVector(2.0f * offsetX / moveDuration);
-                inTouchableFocus.setVyVector(2.0f * offsetY / moveDuration);
-                //inTouchableFocus.setInFocus(false);
+                inTouchableFocus.setVxVector(1.2f * offsetX / moveDuration);
+                inTouchableFocus.setVyVector(1.2f * offsetY / moveDuration);
                 inTouchableFocus = null;
                 collisionStrategy = dynamicCollisionStrategy;
                 this.switchTurn();
         }
     }
+
+    private void switchTurn() {
+        if (turn == null) return;
+        if (turn == homeTeam) {
+            setTurn(opponentTeam);
+        } else {
+            setTurn(homeTeam);
+        }
+    }
+
+    private void setTurn(Team team) {
+        this.turn = team;
+        lastTurnSwitchTime = System.currentTimeMillis();
+    }
+
+    private void setupGraphics() {
+        homePlayerImageScore = BitmapFactory.decodeResource(resources, R.drawable.leftplayer_score);
+        homePlayerImageScore = Bitmap.createScaledBitmap(homePlayerImageScore, 700, 200, false);
+
+        guestPlayerImageScore = BitmapFactory.decodeResource(resources, R.drawable.rightplayer_score);
+        guestPlayerImageScore = Bitmap.createScaledBitmap(guestPlayerImageScore, 700, 200, false);
+
+        Sprite.highlight = Bitmap
+                .createScaledBitmap(BitmapFactory
+                                .decodeResource(resources, R.drawable.player_shadow),
+                        360,360,false);
+
+        timeElapsedPaint.setARGB(200, 179, 0, 59);
+        timeElapsedPaint.setTextSize(85);
+        timeElapsedPaint.setTypeface(gameOfThronesTypeface);
+
+        playerWithTurnTextPaint.setARGB(200, 179, 0, 59);
+        playerWithTurnTextPaint.setTextSize(60);
+        playerWithTurnTextPaint.setTypeface(gameOfThronesTypeface);
+
+        playerWithoutTurnTextPaint.setARGB(150, 39, 12, 12);
+        playerWithoutTurnTextPaint.setTextSize(60);
+        playerWithoutTurnTextPaint.setTypeface(gameOfThronesTypeface);
+
+        playerWithTurnAlphaPaint.setAlpha(150);
+        playerWithoutTurnAlphaPaint.setAlpha(75);
+    }
+
 }

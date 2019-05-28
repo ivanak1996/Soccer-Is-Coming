@@ -3,7 +3,6 @@ package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 import android.graphics.Bitmap;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Team {
 
@@ -35,6 +34,10 @@ public class Team {
 //            Player newPlayer = new Player(screenWidth, screenHeight, position);
             players.get(i).init(logo, i);
         }
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 
     public void gain() {

@@ -5,14 +5,25 @@ public class GameRunner extends Thread{
     private Game game;
     private volatile boolean running = true;
 
+    private GameState gameState;
+
     public GameRunner(Game game) {
         this.game = game;
+    }
+
+    public GameRunner(Game game, GameState gameState){
+        this(game);
+        this.gameState = gameState;
     }
 
     @Override
     public void run() {
 
-        game.init();
+        if(gameState != null) {
+            game.reload(gameState);
+        } else {
+            game.init();
+        }
 
         long lastTime = System.currentTimeMillis();
 

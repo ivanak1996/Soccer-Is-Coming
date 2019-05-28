@@ -1,7 +1,6 @@
 package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 
 public class Ball extends Sprite {
 
@@ -13,6 +12,18 @@ public class Ball extends Sprite {
     public Ball(int screenWidth, int screenHeight) {
 
         super(screenWidth, screenHeight);
+    }
+
+    @Override
+    public void setVxVector(float vx) {
+        super.setVxVector(vx);
+        this.vx *= 0.85;
+    }
+
+    @Override
+    public void setVyVector(float vy) {
+        super.setVyVector(vy);
+        this.vy *= 0.85;
     }
 
     @Override

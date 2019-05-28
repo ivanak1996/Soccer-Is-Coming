@@ -2,8 +2,10 @@ package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.Rect;
-import android.util.Log;
 
 // TODO: maybe add shadow
 public abstract class Sprite {
@@ -24,7 +26,16 @@ public abstract class Sprite {
     private Bitmap image;
     private Bitmap shadow;
 
+    private Paint grayScalePaint = new Paint();
+
     private Rect bounds;
+
+    {
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0.5f);
+        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(cm);
+        this.grayScalePaint.setColorFilter(filter);
+    }
 
     public Sprite(int screenWidth, int screenHeight) {
 
@@ -52,6 +63,10 @@ public abstract class Sprite {
         canvas.drawBitmap(image, x, y, null);
     }
 
+    public void drawGrayscale(Canvas canvas) {
+        canvas.drawBitmap(image, x, y, grayScalePaint);
+    }
+
     public void drawHighlighted(Canvas canvas) {
         canvas.drawBitmap(highlight, x-80, y-80, null);
         canvas.drawBitmap(image, x, y, null);
@@ -60,8 +75,8 @@ public abstract class Sprite {
     protected void updateVelocity() {
         // TODO: create global constants file
         // empiric constants
-        vx *= 0.88f;
-        vy *= 0.88f;
+        vx *= 0.92f;
+        vy *= 0.92f;
     }
 
     public void update(long elapsed) {
