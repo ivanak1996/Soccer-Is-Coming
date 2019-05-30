@@ -17,7 +17,7 @@ import rs.ac.bg.etf.ki150362.socceriscoming.room.match.MatchDao;
 import rs.ac.bg.etf.ki150362.socceriscoming.room.player.Player;
 import rs.ac.bg.etf.ki150362.socceriscoming.room.player.PlayerDao;
 
-@Database(entities = {Player.class, Match.class}, version = 1)
+@Database(entities = {Player.class, Match.class}, version = 1, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class GameDatabase extends RoomDatabase {
 

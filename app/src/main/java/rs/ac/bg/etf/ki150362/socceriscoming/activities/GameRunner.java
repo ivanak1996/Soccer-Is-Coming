@@ -19,11 +19,7 @@ public class GameRunner extends Thread{
     @Override
     public void run() {
 
-        if(gameState != null) {
-            game.reload(gameState);
-        } else {
-            game.init();
-        }
+        game.init();
 
         long lastTime = System.currentTimeMillis();
 

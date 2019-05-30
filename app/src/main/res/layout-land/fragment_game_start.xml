@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_opacity"
+    tools:ignore="MissingDefaultResource"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/imagebutton_about"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_back"
+        android:backgroundTint="#0000"
+        android:layout_gravity="left"
+        android:onClick="onClickFinishActivity"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginBottom="75dp">
+        <Button
+            android:onClick="setFragmentNewGame"
+            android:layout_gravity="center"
+            android:text="New Game"
+            style="@style/medieval_button"
+            android:layout_marginTop="24dp"
+            android:layout_width="300dp"
+            android:layout_height="75dp"
+            android:textSize="24dp" />
+
+        <Button
+            style="@style/medieval_button"
+            android:layout_width="300dp"
+            android:layout_height="75dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="24dp"
+            android:onClick="resumeGameOnClick"
+            android:text="Resume Game"
+            android:textSize="24dp" />
+    </LinearLayout>
+
+</LinearLayout>

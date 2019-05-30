@@ -1,42 +1,29 @@
 package rs.ac.bg.etf.ki150362.socceriscoming;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
-import android.view.View;
+import android.view.*;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
-import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.*;
 
-import rs.ac.bg.etf.ki150362.socceriscoming.activities.GameplayActivity;
+import rs.ac.bg.etf.ki150362.socceriscoming.activities.gaming.GameStartActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.settings.SettingsActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.statistics.StatisticsActivity;
-import rs.ac.bg.etf.ki150362.socceriscoming.fragments.HomeScreenFragment;
-import rs.ac.bg.etf.ki150362.socceriscoming.fragments.NewGameFragment;
+import rs.ac.bg.etf.ki150362.socceriscoming.dialog.about.AboutDialog;
 import rs.ac.bg.etf.ki150362.socceriscoming.util.asynctasks.EnterFullScreenAsyncTask;
 import rs.ac.bg.etf.ki150362.socceriscoming.util.service.MusicService;
 
 public class MainActivity extends AppCompatActivity {
 
+    // settings activity constants
     public static final int REQ_CODE_SETTINGS_ACTIVITY = 128;
     public static final String EXTRA_SETTINGS_MESSAGE = "EXTRA_SETTINGS_MESSAGE";
-    public static final String EXTRA_HOME_PLAYER_NAME = "EXTRA_HOME_PLAYER_NAME";
-    public static final String EXTRA_GUEST_PLAYER_NAME = "EXTRA_GUEST_PLAYER_NAME";
-    public static final String EXTRA_HOME_PLAYER_DRAWABLE = "EXTRA_HOME_PLAYER_DRAWABLE";
-    public static final String EXTRA_GUEST_PLAYER_DRAWABLE = "EXTRA_GUEST_PLAYER_DRAWABLE";
 
     private boolean mIsBound = false;
-    private HomeScreenFragment homeScreenFragment;
-    private NewGameFragment newGameFragment;
+
     private MusicService mServ;
 
     private ServiceConnection sCon = new ServiceConnection() {
@@ -74,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
     }
 
-
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
@@ -88,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setFragmentHome(null);
 
         setContentView(R.layout.activity_main);
 
@@ -118,13 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 (new View.OnSystemUiVisibilityChangeListener() {
                     @Override
                     public void onSystemUiVisibilityChange(int visibility) {
-                        // Note that system bars will only be "visible" if none of the
-                        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
                         if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                            // TODO: The system bars are visible. Make any desired
-                            // adjustments to your UI, such as showing the action bar or
-                            // other navigational controls.
-                            // enterFullScreenMode();
                             (new EnterFullScreenAsyncTask(getWindow().getDecorView())).execute();
                         } else {
                             // TODO: The system bars are NOT visible. Make any desired
@@ -134,6 +112,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        ImageButton aboutImageButton = findViewById(R.id.imagebutton_about);
+        aboutImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAboutDialog();
+            }
+        });
 
         // sound
 
@@ -150,45 +135,9 @@ public class MainActivity extends AppCompatActivity {
         doUnbindService();
     }
 
-    public void playGameOnClick(View view) {
-
-        String player1Name = ((AutoCompleteTextView)findViewById(R.id.autocomplete_player1name)).getText().toString();
-        String player2Name = ((AutoCompleteTextView)findViewById(R.id.autocomplete_player2name)).getText().toString();
-
-        int player1TeamIndex = ((Spinner) findViewById(R.id.spinner_player1)).getSelectedItemPosition();
-        int player1DrawableId = NewGameFragment.images[player1TeamIndex];
-
-        int player2TeamIndex = ((Spinner) findViewById(R.id.spinner_player2)).getSelectedItemPosition();
-        int player2DrawableId = NewGameFragment.images[player2TeamIndex];
-
-        Intent gameplayIntent = new Intent(MainActivity.this, GameplayActivity.class);
-
-        gameplayIntent.putExtra(EXTRA_HOME_PLAYER_NAME, player1Name);
-        gameplayIntent.putExtra(EXTRA_GUEST_PLAYER_NAME, player2Name);
-        gameplayIntent.putExtra(EXTRA_HOME_PLAYER_DRAWABLE, player1DrawableId);
-        gameplayIntent.putExtra(EXTRA_GUEST_PLAYER_DRAWABLE, player2DrawableId);
-
-        MainActivity.this.startActivity(gameplayIntent);
-    }
-
-    public void setFragmentNewGame(View view) {
-        if(newGameFragment == null) {
-            newGameFragment = new NewGameFragment();
-        }
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction transaction = fm.beginTransaction();
-        transaction.replace(R.id.fragment_main, newGameFragment);
-        transaction.commit();
-    }
-
-    public void setFragmentHome(View view) {
-        if(homeScreenFragment == null) {
-            homeScreenFragment = new HomeScreenFragment();
-        }
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction transaction = fm.beginTransaction();
-        transaction.replace(R.id.fragment_main, homeScreenFragment);
-        transaction.commit();
+    void openAboutDialog() {
+        AboutDialog aboutDialog = new AboutDialog();
+        aboutDialog.show(getSupportFragmentManager(), "about");
     }
 
     public void onClickOpenSettings(View view) {
@@ -196,17 +145,24 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, REQ_CODE_SETTINGS_ACTIVITY);
     }
 
+    public void onClickOpenStatistics(View view) {
+        Intent intent = new Intent(this, StatisticsActivity.class);
+        startActivity(intent);
+    }
+
+    public void onClickGameStart(View view) {
+        Intent intent = new Intent(this, GameStartActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if(requestCode == REQ_CODE_SETTINGS_ACTIVITY && resultCode == RESULT_OK) {
             String message = data.getStringExtra(EXTRA_SETTINGS_MESSAGE);
             if(message != null) Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
-    }
 
-    public void onClickOpenStatistics(View view) {
-        Intent intent = new Intent(this, StatisticsActivity.class);
-        startActivity(intent);
     }
 }

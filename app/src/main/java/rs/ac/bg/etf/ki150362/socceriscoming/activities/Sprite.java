@@ -164,6 +164,10 @@ public abstract class Sprite {
         return screenHeight;
     }
 
+    public void setScreenHeight(int screenHeight) {
+        this.screenHeight = screenHeight;
+    }
+
     public Rect getRect() {
         return bounds;
     }

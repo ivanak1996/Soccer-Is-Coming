@@ -18,7 +18,7 @@
             android:src="@drawable/ic_back"
             android:backgroundTint="#0000"
             android:layout_gravity="left"
-            android:onClick="setFragmentHome"
+            android:onClick="setFragmentGameStart"
             />
 
         <LinearLayout

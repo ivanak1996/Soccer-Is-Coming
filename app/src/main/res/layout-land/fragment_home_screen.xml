@@ -6,7 +6,7 @@
     tools:ignore="MissingDefaultResource"
     android:background="@drawable/background_image_main">
 
-    <ImageButton
+    <!--<ImageButton
         android:id="@+id/imagebutton_about"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
 
         <ImageButton
             android:layout_weight="1"
-            android:onClick="setFragmentNewGame"
+            android:onClick="onClickGameStart"
             android:id="@+id/imagebutton_play"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -101,6 +101,6 @@
             android:layout_gravity="center"
             />
 
-    </LinearLayout>
+    </LinearLayout>-->
 
 </LinearLayout>

@@ -7,8 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
-import rs.ac.bg.etf.ki150362.socceriscoming.MainActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
+import rs.ac.bg.etf.ki150362.socceriscoming.activities.gaming.GameStartActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.util.asynctasks.EnterFullScreenAsyncTask;
 
 public class GameplayActivity extends AppCompatActivity {
@@ -23,13 +23,11 @@ public class GameplayActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
     }
 
-
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
 
         if (hasFocus) {
-            // full screen
             enterFullScreenMode();
         }
     }
@@ -40,18 +38,26 @@ public class GameplayActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_gameplay);
 
-        /*
-        gameplayIntent.putExtra(EXTRA_HOME_PLAYER_NAME, player1Name);
-        gameplayIntent.putExtra(EXTRA_GUEST_PLAYER_NAME, player2Name);
-        gameplayIntent.putExtra(EXTRA_HOME_PLAYER_DRAWABLE, player1DrawableId);
-        gameplayIntent.putExtra(EXTRA_GUEST_PLAYER_DRAWABLE, player2DrawableId);
-         */
-
         Intent caller = getIntent();
-        String homePlayerName = caller.getStringExtra(MainActivity.EXTRA_HOME_PLAYER_NAME);
-        String guestPlayerName = caller.getStringExtra(MainActivity.EXTRA_GUEST_PLAYER_NAME);
-        int homeDrawableResId = caller.getIntExtra(MainActivity.EXTRA_HOME_PLAYER_DRAWABLE, -1);
-        int guestDrawableResId = caller.getIntExtra(MainActivity.EXTRA_GUEST_PLAYER_DRAWABLE, -1);
+
+        InitializerStrategy initStrategy = null;
+        int gameStartStrategy = caller.getIntExtra(GameStartActivity.EXTRA_GAME_START_STRATEGY, -1);
+
+        if(GameStartActivity.GAME_START_STRATEGY_NEWGAME == gameStartStrategy) {
+
+            String homePlayerName = caller.getStringExtra(GameStartActivity.EXTRA_HOME_PLAYER_NAME);
+            String guestPlayerName = caller.getStringExtra(GameStartActivity.EXTRA_GUEST_PLAYER_NAME);
+            int homeDrawableResId = caller.getIntExtra(GameStartActivity.EXTRA_HOME_PLAYER_DRAWABLE, -1);
+            int guestDrawableResId = caller.getIntExtra(GameStartActivity.EXTRA_GUEST_PLAYER_DRAWABLE, -1);
+            initStrategy = new NewGameInitializerStrategy(homePlayerName, guestPlayerName, homeDrawableResId, guestDrawableResId);
+
+        } else if(GameStartActivity.GAME_START_STRATEGY_CONTINUE == gameStartStrategy) {
+
+            initStrategy = new ResumeGameInitializerStrategy(GameState.reloadGame(this));
+
+        } else {
+            // TODO: not valid
+        }
 
         // full screen
         View decorView = getWindow().getDecorView();
@@ -84,7 +90,7 @@ public class GameplayActivity extends AppCompatActivity {
         FrameLayout.LayoutParams soccerFieldParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         soccerFieldView.setLayoutParams(soccerFieldParams);
 
-        SoccerLogicSurfaceView soccerLogicSurfaceView = new SoccerLogicSurfaceView(this, soccerFieldView, homePlayerName, guestPlayerName, homeDrawableResId, guestDrawableResId);
+        SoccerLogicSurfaceView soccerLogicSurfaceView = new SoccerLogicSurfaceView(this, soccerFieldView, initStrategy);
         FrameLayout.LayoutParams soccerLogicSurfaceParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         soccerLogicSurfaceView.setLayoutParams(soccerLogicSurfaceParams);
 

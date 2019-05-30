@@ -86,19 +86,19 @@ public class Game {
                 player2.safeSetX(newPlayer2X);
                 player2.safeSetY(newPlayer2Y);
 
-                float nx = (c1.x - c2.x)/distance;
-                float ny = (c1.y - c2.y)/distance;
+                float nx = (c1.x - c2.x) / distance;
+                float ny = (c1.y - c2.y) / distance;
 
                 float tx = -ny;
                 float ty = nx;
 
                 // dot product tangent
-                float dpTan1 = player1.getVxVector() * tx + player1.getVyVector() * ty ;
-                float dpTan2 = player2.getVxVector() * tx + player2.getVyVector() * ty ;
+                float dpTan1 = player1.getVxVector() * tx + player1.getVyVector() * ty;
+                float dpTan2 = player2.getVxVector() * tx + player2.getVyVector() * ty;
 
                 // dot product normal
-                float dpNorm1 = player1.getVxVector()*nx+player1.getVyVector()*ny;
-                float dpNorm2 = player2.getVxVector()*nx+player2.getVyVector()*ny;
+                float dpNorm1 = player1.getVxVector() * nx + player1.getVyVector() * ny;
+                float dpNorm2 = player2.getVxVector() * nx + player2.getVyVector() * ny;
 
                 // conversion of momentum in 1D
                 float m1 = (dpNorm1 * (r2 - r1) + 2.0f * r2 * dpNorm2) / (r1 + r2);
@@ -117,7 +117,7 @@ public class Game {
 
     // region Graphics
 
-    private Resources resources;
+    Resources resources;
     private SurfaceHolder surfaceHolder;
 
     private Bitmap homePlayerImageScore;
@@ -132,21 +132,23 @@ public class Game {
     private Paint timeElapsedPaint = new Paint();
 
 
-    private Bitmap homeTeamImage, opponentTeamImage, ballImage;
-    private int homePlayerDrawableId, guestPlayerDrawableId;
+    Bitmap homeTeamImage, guestTeamImage, ballImage;
+    int homePlayerDrawableId;
+    int guestPlayerDrawableId;
 
     // endregion
 
     // region Fields
 
     // TODO refactor opponent to guest everywhere
-    private Team homeTeam, opponentTeam;
-    private Team turn;
+    Team homeTeam;
+    Team guestTeam;
+    Team turn;
 
     private Player inTouchableFocus = null;
     private Player inFocus = null;
 
-    private Ball ball;
+    Ball ball;
 
     private SoccerFieldView soccerFieldView;
 
@@ -155,40 +157,34 @@ public class Game {
 
     private CollisionStrategy collisionStrategy = staticCollisionStrategy;
 
-    private String homePlayerName, guestPlayerName;
+    String homePlayerName;
+    String guestPlayerName;
 
     private long lastTurnSwitchTime;
-    private long gameStartedTime;
+    long gameStartedTime;
 
     private LinkedList<Player> players = new LinkedList<>();
 
     // endregion
 
-    public Game(SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources,
-                String homePlayerName, String guestPlayerName,
-                int homePlayerDrawableId, int guestPlayerDrawableId,
-                Typeface gameOfThronesTypeface) {
+    private InitializerStrategy initStrategy;
+
+    public Game(SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources, Typeface typeface, InitializerStrategy initStrategy) {
 
         this.soccerFieldView = soccerFieldView;
         this.surfaceHolder = surfaceHolder;
         this.resources = resources;
-
-        this.homePlayerName = homePlayerName;
-        this.guestPlayerName = guestPlayerName;
-
-        this.homePlayerDrawableId = homePlayerDrawableId;
-        this.guestPlayerDrawableId = guestPlayerDrawableId;
-
-        this.gameOfThronesTypeface = gameOfThronesTypeface;
+        this.gameOfThronesTypeface = typeface;
+        this.initStrategy = initStrategy;
 
         ball = new Ball(soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
         homeTeam = new Team(Player.Position.HOME, soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
-        opponentTeam = new Team(Player.Position.OPPONENT, soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
+        guestTeam = new Team(Player.Position.OPPONENT, soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
 
         setTurn(homeTeam);
 
         players.addAll(homeTeam.getPlayers());
-        players.addAll(opponentTeam.getPlayers());
+        players.addAll(guestTeam.getPlayers());
 
         setupGraphics();
 
@@ -197,77 +193,14 @@ public class Game {
 
     // sets up the game
     public void init() {
-
-        Bitmap ballImage = BitmapFactory.decodeResource(resources, R.drawable.ball_dragon);
-        ballImage = Bitmap.createScaledBitmap(ballImage, 100, 100, false);
-        this.ballImage = ballImage;
-
-        Bitmap homePlayerImage = BitmapFactory.decodeResource(resources, homePlayerDrawableId);
-        homePlayerImage = Bitmap.createScaledBitmap(homePlayerImage, 200, 200, false);
-        this.homeTeamImage = homePlayerImage;
-
-        Bitmap opponentPlayerImage = BitmapFactory.decodeResource(resources, guestPlayerDrawableId);
-        opponentPlayerImage = Bitmap.createScaledBitmap(opponentPlayerImage, 200, 200, false);
-        this.opponentTeamImage = opponentPlayerImage;
-
-        ball.init(ballImage);
-        homeTeam.init(homePlayerImage);
-        opponentTeam.init(opponentPlayerImage);
-    }
-
-    // sets up the game that has been reloaded
-    public void reload(GameState gameState) {
-
-        if (gameState != null) {
-
-            homePlayerDrawableId = gameState.homePlayerDrawableId;
-            guestPlayerDrawableId = gameState.guestPlayerDrawableId;
-
-            init();
-
-            gameStartedTime = gameState.timeElapsed;
-            homePlayerName = gameState.homePlayerName;
-            guestPlayerName = gameState.guestPlayerName;
-
-            homeTeam.setScore(gameState.homePlayerScore);
-            opponentTeam.setScore(gameState.guestPlayerScore);
-
-            for (int i = 0; i < Team.NUMBER_OF_PLAYERS; i++) {
-
-                homeTeam.getPlayers().get(i).setX(gameState.homePlayersCoordinates[i][0]);
-                homeTeam.getPlayers().get(i).setY(gameState.homePlayersCoordinates[i][1]);
-
-                homeTeam.getPlayers().get(i).setVxVector(gameState.homePlayersVelocities[i][0]);
-                homeTeam.getPlayers().get(i).setVyVector(gameState.homePlayersVelocities[i][1]);
-
-                opponentTeam.getPlayers().get(i).setX(gameState.guestPlayersCoordinates[i][0]);
-                opponentTeam.getPlayers().get(i).setY(gameState.guestPlayersCoordinates[i][1]);
-
-                opponentTeam.getPlayers().get(i).setVxVector(gameState.guestPlayersVelocities[i][0]);
-                opponentTeam.getPlayers().get(i).setVyVector(gameState.guestPlayersVelocities[i][1]);
-
-            }
-
-            turn = gameState.homePlayersTurn ? homeTeam : opponentTeam;
-
-            ball.setX(gameState.ballX);
-            ball.setY(gameState.ballY);
-
-            ball.setVxVector(gameState.ballVx);
-            ball.setVyVector(gameState.ballVy);
-
-        }
-        else {
-            init();
-        }
+        initStrategy.init(this);
     }
 
     public void update(long elapsed) {
 
-        for(Player player1 : players) {
-            for(Player player2: players) {
-                if(player1 != player2){
-//                    detectCollisionDynamic(player1, player2);
+        for (Player player1 : players) {
+            for (Player player2 : players) {
+                if (player1 != player2) {
                     collisionStrategy.detectCollision(player1, player2);
                 }
             }
@@ -277,22 +210,22 @@ public class Game {
         ball.setScreenWidth(soccerFieldView.getSoccerFieldWidth());
         ball.update(elapsed);
 
-        for(Player player:players){
+        for (Player player : players) {
             //player.setScreenWidth(soccerFieldView.getSoccerFieldWidth());
             player.update(elapsed);
         }
 
-        if(turn != null) {
-            if(soccerFieldView.getOppositeGoal().contains(ball.getScreenRect().centerX(), ball.getScreenRect().centerY())) {
+        if (turn != null) {
+            if (soccerFieldView.getOppositeGoal().contains(ball.getScreenRect().centerX(), ball.getScreenRect().centerY())) {
                 homeTeam.gain();
                 reinit();
             } else if (soccerFieldView.getHomeGoal().contains(ball.getScreenRect().centerX(), ball.getScreenRect().centerY())) {
-                opponentTeam.gain();
+                guestTeam.gain();
                 reinit();
             }
         }
 
-        if(System.currentTimeMillis() - lastTurnSwitchTime > 5000) {
+        if (System.currentTimeMillis() - lastTurnSwitchTime > 5000) {
             switchTurn();
         }
 
@@ -302,10 +235,10 @@ public class Game {
     private void reinit() {
 
         homeTeam.init(homeTeamImage);
-        opponentTeam.init(opponentTeamImage);
+        guestTeam.init(guestTeamImage);
         ball.init(ballImage);
 
-        for(Player player:players){
+        for (Player player : players) {
             player.setVxVector(0.0f);
             player.setVyVector(0.0f);
         }
@@ -323,8 +256,8 @@ public class Game {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
             ball.draw(canvas);
-            for(Player player:players) {
-                if(turn.getPlayers().contains(player))
+            for (Player player : players) {
+                if (turn.getPlayers().contains(player))
                     player.draw(canvas);
                 else
                     player.drawGrayscale(canvas);
@@ -333,13 +266,13 @@ public class Game {
             // score
 
             Paint homePlayerTextPaint = turn == homeTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
-            Paint guestPlayerTextPaint = turn == opponentTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
+            Paint guestPlayerTextPaint = turn == guestTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
 
             Paint homePlayerAlphaPaint = turn == homeTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
-            Paint guestPlayerAlphaPaint = turn == opponentTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
+            Paint guestPlayerAlphaPaint = turn == guestTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
 
             String homePlayerResultText = homePlayerName + " " + homeTeam.getScore();
-            String guestTeamResultText = opponentTeam.getScore() + " " + guestPlayerName;
+            String guestTeamResultText = guestTeam.getScore() + " " + guestPlayerName;
 
             Rect textBounds = new Rect();
             guestPlayerTextPaint.getTextBounds(guestTeamResultText, 0, guestTeamResultText.length(), textBounds);
@@ -348,7 +281,7 @@ public class Game {
             canvas.drawBitmap(guestPlayerImageScore, canvas.getWidth() - guestPlayerImageScore.getWidth(), canvas.getHeight() - guestPlayerImageScore.getHeight(), guestPlayerAlphaPaint);
 
             canvas.drawText(homePlayerResultText, 50, canvas.getHeight() - 50, homePlayerTextPaint);
-            canvas.drawText(guestTeamResultText, canvas.getWidth()-textBounds.width()-50, canvas.getHeight() - 50, guestPlayerTextPaint);
+            canvas.drawText(guestTeamResultText, canvas.getWidth() - textBounds.width() - 50, canvas.getHeight() - 50, guestPlayerTextPaint);
 
             //time
             long elapsed = System.currentTimeMillis() - gameStartedTime;
@@ -363,7 +296,7 @@ public class Game {
             Log.d("elapsed", timeElapsedString);
 
             Rect timeElapsedTextBounds = new Rect();
-            timeElapsedPaint.getTextBounds("00:00", 0,timeElapsedString.length(), timeElapsedTextBounds);
+            timeElapsedPaint.getTextBounds("00:00", 0, timeElapsedString.length(), timeElapsedTextBounds);
 
             canvas.drawText(timeElapsedString, 40, 80, timeElapsedPaint);
 
@@ -382,14 +315,14 @@ public class Game {
         gameState.guestPlayerName = this.guestPlayerName;
 
         gameState.homePlayerScore = this.homeTeam.getScore();
-        gameState.guestPlayerScore = this.opponentTeam.getScore();
+        gameState.guestPlayerScore = this.guestTeam.getScore();
 
         float[][] homePlayersCoordinates = new float[Team.NUMBER_OF_PLAYERS][2];
         float[][] guestPlayersCoordinates = new float[Team.NUMBER_OF_PLAYERS][2];
         float[][] homePlayersVelocities = new float[Team.NUMBER_OF_PLAYERS][2];
         float[][] guestPlayersVelocities = new float[Team.NUMBER_OF_PLAYERS][2];
 
-        for(int i=0; i< Team.NUMBER_OF_PLAYERS; i++) {
+        for (int i = 0; i < Team.NUMBER_OF_PLAYERS; i++) {
 
             homePlayersCoordinates[i][0] = homeTeam.getPlayers().get(i).getX();
             homePlayersCoordinates[i][1] = homeTeam.getPlayers().get(i).getY();
@@ -397,11 +330,11 @@ public class Game {
             homePlayersVelocities[i][0] = homeTeam.getPlayers().get(i).getVxVector();
             homePlayersVelocities[i][1] = homeTeam.getPlayers().get(i).getVyVector();
 
-            guestPlayersCoordinates[i][0] = opponentTeam.getPlayers().get(i).getX();
-            guestPlayersCoordinates[i][1] = opponentTeam.getPlayers().get(i).getY();
+            guestPlayersCoordinates[i][0] = guestTeam.getPlayers().get(i).getX();
+            guestPlayersCoordinates[i][1] = guestTeam.getPlayers().get(i).getY();
 
-            guestPlayersVelocities[i][0] = opponentTeam.getPlayers().get(i).getVxVector();
-            guestPlayersVelocities[i][1] = opponentTeam.getPlayers().get(i).getVyVector();
+            guestPlayersVelocities[i][0] = guestTeam.getPlayers().get(i).getVxVector();
+            guestPlayersVelocities[i][1] = guestTeam.getPlayers().get(i).getVyVector();
 
         }
 
@@ -424,19 +357,28 @@ public class Game {
         gameState.saveGame(context);
     }
 
+    public void onSurfaceChanged(int width, int height) {
+        for (Player player : players) {
+            player.setScreenWidth(width);
+            player.setScreenHeight(height);
+        }
+        ball.setScreenWidth(width);
+        ball.setScreenHeight(height);
+    }
+
 
     public void onTouchEvent(MotionEvent event) {
 
-        int x = (int)event.getX();
-        int y = (int)event.getY();
+        int x = (int) event.getX();
+        int y = (int) event.getY();
 
-        switch(event.getAction() & MotionEvent.ACTION_MASK) {
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
 
-                if(turn == null) return;
-                for(Player player : turn.getPlayers()) {
-                    if(player.getScreenRect().contains(x, y)){
-                        if (inFocus!=null) {
+                if (turn == null) return;
+                for (Player player : turn.getPlayers()) {
+                    if (player.getScreenRect().contains(x, y)) {
+                        if (inFocus != null) {
                             inFocus.setInFocus(false);
                         }
                         inTouchableFocus = inFocus = player;
@@ -458,9 +400,9 @@ public class Game {
 //                inTouchableFocus.safeSetPosition(x, y);
                 break;
             case MotionEvent.ACTION_UP:
-                if(turn == null || inTouchableFocus == null) return;
+                if (turn == null || inTouchableFocus == null) return;
                 long releaseTime = System.currentTimeMillis();
-                Log.d("onTouchEvnt up action", ""+(releaseTime - actionDownTime));
+                Log.d("onTouchEvnt up action", "" + (releaseTime - actionDownTime));
                 float offsetX = x - actionDownX;
                 float offsetY = y - actionDownY;
                 float moveDuration = releaseTime - actionDownTime;
@@ -476,7 +418,7 @@ public class Game {
     private void switchTurn() {
         if (turn == null) return;
         if (turn == homeTeam) {
-            setTurn(opponentTeam);
+            setTurn(guestTeam);
         } else {
             setTurn(homeTeam);
         }
@@ -497,7 +439,7 @@ public class Game {
         Sprite.highlight = Bitmap
                 .createScaledBitmap(BitmapFactory
                                 .decodeResource(resources, R.drawable.player_shadow),
-                        360,360,false);
+                        360, 360, false);
 
         timeElapsedPaint.setARGB(200, 179, 0, 59);
         timeElapsedPaint.setTextSize(85);
