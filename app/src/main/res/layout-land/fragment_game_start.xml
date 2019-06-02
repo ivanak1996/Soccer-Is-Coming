@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="@drawable/background_opacity"
     tools:ignore="MissingDefaultResource"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:keepScreenOn="true">
 
     <ImageButton
         android:id="@+id/imagebutton_about"

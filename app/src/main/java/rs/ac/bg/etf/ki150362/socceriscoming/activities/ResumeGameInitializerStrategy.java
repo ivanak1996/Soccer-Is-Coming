@@ -18,7 +18,7 @@ public class ResumeGameInitializerStrategy extends InitializerStrategy {
 
             super.init(game);
 
-            game.gameStartedTime = gameState.timeElapsed;
+            game.elapsedInTotal = gameState.elapsedInTotal;
             game.homePlayerName = gameState.homePlayerName;
             game.guestPlayerName = gameState.guestPlayerName;
 

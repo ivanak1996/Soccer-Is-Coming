@@ -3,6 +3,7 @@ package rs.ac.bg.etf.ki150362.socceriscoming.activities.settings;
 import android.content.*;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.*;
 
@@ -95,6 +96,8 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void setSharedPreferences() {
+
+        Log.d("setSharedPrefs", "spinner item chosen: "+spinner.getSelectedItem().toString());
 
         SharedPreferences.Editor editor = getSharedPreferences(PREFERENCES_GOT_SETTINGS, MODE_PRIVATE).edit();
         editor.putString(PREFERENCE_TERRAIN, spinner.getSelectedItem().toString());

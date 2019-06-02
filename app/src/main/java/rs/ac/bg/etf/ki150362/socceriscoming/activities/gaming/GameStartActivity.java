@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.GameplayActivity;
@@ -19,6 +20,8 @@ import rs.ac.bg.etf.ki150362.socceriscoming.util.asynctasks.EnterFullScreenAsync
 public class GameStartActivity extends AppCompatActivity {
 
     public static final int REQ_CODE_RESUME_GAME = 256;
+    public static final int REQ_CODE_NEW_GAME = 257;
+
     public static final int GAME_START_STRATEGY_NEWGAME = 0;
     public static final int GAME_START_STRATEGY_CONTINUE = 1;
 
@@ -27,6 +30,7 @@ public class GameStartActivity extends AppCompatActivity {
     public static final String EXTRA_GUEST_PLAYER_NAME = "EXTRA_GUEST_PLAYER_NAME";
     public static final String EXTRA_HOME_PLAYER_DRAWABLE = "EXTRA_HOME_PLAYER_DRAWABLE";
     public static final String EXTRA_GUEST_PLAYER_DRAWABLE = "EXTRA_GUEST_PLAYER_DRAWABLE";
+    public static final String EXTRA_FINISHED_GAME_MESSAGE = "EXTRA_FINISHED_GAME_MESSAGE";
 
 
     private GameStartFragment gameStartFragment;
@@ -117,7 +121,8 @@ public class GameStartActivity extends AppCompatActivity {
         gameplayIntent.putExtra(EXTRA_HOME_PLAYER_DRAWABLE, player1DrawableId);
         gameplayIntent.putExtra(EXTRA_GUEST_PLAYER_DRAWABLE, player2DrawableId);
 
-        GameStartActivity.this.startActivity(gameplayIntent);
+        //GameStartActivity.this.startActivity(gameplayIntent);
+        startActivityForResult(gameplayIntent, REQ_CODE_NEW_GAME);
     }
 
     public void onClickFinishActivity(View view) {
@@ -143,6 +148,9 @@ public class GameStartActivity extends AppCompatActivity {
 
         if(requestCode == REQ_CODE_RESUME_GAME && resultCode == RESULT_OK) {
 
+        }
+        if(requestCode == REQ_CODE_NEW_GAME && resultCode == RESULT_OK) {
+            Toast.makeText(this, "Game finished", Toast.LENGTH_SHORT).show();
         }
     }
 }

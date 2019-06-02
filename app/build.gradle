@@ -39,4 +39,6 @@ dependencies {
     //Room components
     implementation "android.arch.persistence.room:runtime:$room_version"
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+
+    implementation 'com.facebook.stetho:stetho:1.5.1'
 }

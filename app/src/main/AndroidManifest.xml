@@ -33,8 +33,12 @@
         <activity
             android:name=".activities.gaming.GameStartActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".activities.GameplayActivity"
-            android:screenOrientation="landscape"/>
+        <activity
+            android:name=".activities.GameplayActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".activities.results.ResultsActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>

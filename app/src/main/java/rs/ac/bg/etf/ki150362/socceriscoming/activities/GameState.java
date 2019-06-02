@@ -15,7 +15,7 @@ public class GameState implements Serializable {
 
     public static final String FILE_NAME = "saved game file";
 
-    public long timeElapsed;
+    public long elapsedInTotal;
 
     public String homePlayerName, guestPlayerName;
     public int homePlayerScore, guestPlayerScore;
@@ -82,6 +82,13 @@ public class GameState implements Serializable {
         return null;
     }
 
+    public static void eraseGameState(Context context) {
+        File file = new File(context.getFilesDir(), FILE_NAME);
 
+        if (file.exists()) {
+            file.delete();
+            Log.d("eraseGameState", "File deleted.");
+        }
+    }
 
 }

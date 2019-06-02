@@ -1,8 +1,6 @@
 package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Rect;
 
 import java.util.Random;
 
@@ -134,19 +132,6 @@ public class Player extends Sprite {
             setX(getScreenWidth() - margin - (index % 2) * margin * 0.75f - getRect().centerX());
         }
         setY(getScreenHeight() / 2 - getRect().centerY() + (1 - index) * margin * 1.2f);
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-        if (hasFocus) {
-            drawHighlighted(canvas);
-            return;
-        }
-        super.draw(canvas);
-    }
-
-    public boolean isInFocus() {
-        return hasFocus;
     }
 
     public void setInFocus(boolean hasFocus) {

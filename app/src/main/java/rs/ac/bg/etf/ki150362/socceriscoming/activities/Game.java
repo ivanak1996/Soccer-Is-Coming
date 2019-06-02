@@ -1,17 +1,25 @@
 package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.Log;
-import android.view.*;
+import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 
 import java.util.LinkedList;
-import java.util.concurrent.TimeUnit;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
 
+import static java.lang.Math.max;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
 
@@ -129,8 +137,6 @@ public class Game {
     private Paint playerWithoutTurnTextPaint = new Paint();
     private Paint playerWithTurnAlphaPaint = new Paint();
     private Paint playerWithoutTurnAlphaPaint = new Paint();
-    private Paint timeElapsedPaint = new Paint();
-
 
     Bitmap homeTeamImage, guestTeamImage, ballImage;
     int homePlayerDrawableId;
@@ -140,10 +146,10 @@ public class Game {
 
     // region Fields
 
-    // TODO refactor opponent to guest everywhere
     Team homeTeam;
     Team guestTeam;
     Team turn;
+    int leadingScore = 0;
 
     private Player inTouchableFocus = null;
     private Player inFocus = null;
@@ -161,13 +167,17 @@ public class Game {
     String guestPlayerName;
 
     private long lastTurnSwitchTime;
-    long gameStartedTime;
+    long elapsedInTotal = 0;
 
     private LinkedList<Player> players = new LinkedList<>();
 
     // endregion
 
     private InitializerStrategy initStrategy;
+
+    public boolean isGameFinished() {
+        return (leadingScore >= 3);
+    }
 
     public Game(SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources, Typeface typeface, InitializerStrategy initStrategy) {
 
@@ -188,7 +198,6 @@ public class Game {
 
         setupGraphics();
 
-        gameStartedTime = System.currentTimeMillis();
     }
 
     // sets up the game
@@ -197,6 +206,8 @@ public class Game {
     }
 
     public void update(long elapsed) {
+
+        elapsedInTotal += elapsed;
 
         for (Player player1 : players) {
             for (Player player2 : players) {
@@ -211,7 +222,6 @@ public class Game {
         ball.update(elapsed);
 
         for (Player player : players) {
-            //player.setScreenWidth(soccerFieldView.getSoccerFieldWidth());
             player.update(elapsed);
         }
 
@@ -223,6 +233,7 @@ public class Game {
                 guestTeam.gain();
                 reinit();
             }
+            leadingScore = max(homeTeam.getScore(), guestTeam.getScore());
         }
 
         if (System.currentTimeMillis() - lastTurnSwitchTime > 5000) {
@@ -255,61 +266,77 @@ public class Game {
         if (canvas != null) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
 
-            ball.draw(canvas);
-            for (Player player : players) {
-                if (turn.getPlayers().contains(player))
-                    player.draw(canvas);
-                else
-                    player.drawGrayscale(canvas);
+            if(isGameFinished()) {
+                drawGameFinished(canvas);
+            } else {
+
+                ball.draw(canvas);
+                for (Player player : players) {
+                    if (turn.getPlayers().contains(player))
+                        player.drawHighlighted(canvas);
+                    else
+                        player.drawGrayscale(canvas);
+                }
+                // score
+                Paint homePlayerTextPaint = turn == homeTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
+                Paint guestPlayerTextPaint = turn == guestTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
+
+                Paint homePlayerAlphaPaint = turn == homeTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
+                Paint guestPlayerAlphaPaint = turn == guestTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
+
+                String homePlayerResultText = homePlayerName + " " + homeTeam.getScore();
+                String guestTeamResultText = guestTeam.getScore() + " " + guestPlayerName;
+
+                Rect textBounds = new Rect();
+                guestPlayerTextPaint.getTextBounds(guestTeamResultText, 0, guestTeamResultText.length(), textBounds);
+
+                canvas.drawBitmap(homePlayerImageScore, 0, canvas.getHeight() - homePlayerImageScore.getHeight(), homePlayerAlphaPaint);
+                canvas.drawBitmap(guestPlayerImageScore,
+                        canvas.getWidth() - guestPlayerImageScore.getWidth(), canvas.getHeight() - guestPlayerImageScore.getHeight(), guestPlayerAlphaPaint);
+
+                canvas.drawText(homePlayerResultText, 50, canvas.getHeight() - 50, homePlayerTextPaint);
+                canvas.drawText(guestTeamResultText, canvas.getWidth() - textBounds.width() - 50, canvas.getHeight() - 50, guestPlayerTextPaint);
             }
-
-            // score
-
-            Paint homePlayerTextPaint = turn == homeTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
-            Paint guestPlayerTextPaint = turn == guestTeam ? playerWithTurnTextPaint : playerWithoutTurnTextPaint;
-
-            Paint homePlayerAlphaPaint = turn == homeTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
-            Paint guestPlayerAlphaPaint = turn == guestTeam ? playerWithTurnAlphaPaint : playerWithoutTurnAlphaPaint;
-
-            String homePlayerResultText = homePlayerName + " " + homeTeam.getScore();
-            String guestTeamResultText = guestTeam.getScore() + " " + guestPlayerName;
-
-            Rect textBounds = new Rect();
-            guestPlayerTextPaint.getTextBounds(guestTeamResultText, 0, guestTeamResultText.length(), textBounds);
-
-            canvas.drawBitmap(homePlayerImageScore, 0, canvas.getHeight() - homePlayerImageScore.getHeight(), homePlayerAlphaPaint);
-            canvas.drawBitmap(guestPlayerImageScore, canvas.getWidth() - guestPlayerImageScore.getWidth(), canvas.getHeight() - guestPlayerImageScore.getHeight(), guestPlayerAlphaPaint);
-
-            canvas.drawText(homePlayerResultText, 50, canvas.getHeight() - 50, homePlayerTextPaint);
-            canvas.drawText(guestTeamResultText, canvas.getWidth() - textBounds.width() - 50, canvas.getHeight() - 50, guestPlayerTextPaint);
-
-            //time
-            long elapsed = System.currentTimeMillis() - gameStartedTime;
-
-            @SuppressLint("DefaultLocale")
-            String timeElapsedString = String.format("%02d:%02d",
-                    TimeUnit.MILLISECONDS.toMinutes(elapsed) -
-                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(elapsed)),
-                    TimeUnit.MILLISECONDS.toSeconds(elapsed) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(elapsed)));
-
-            Log.d("elapsed", timeElapsedString);
-
-            Rect timeElapsedTextBounds = new Rect();
-            timeElapsedPaint.getTextBounds("00:00", 0, timeElapsedString.length(), timeElapsedTextBounds);
-
-            canvas.drawText(timeElapsedString, 40, 80, timeElapsedPaint);
-
             surfaceHolder.unlockCanvasAndPost(canvas);
 
         }
+    }
+
+    private void drawGameFinished(Canvas canvas) {
+
+        if (canvas != null) {
+
+            Paint paint = new Paint();
+            paint.setARGB(150, 255, 255, 255);
+            canvas.drawRect(0,0,canvas.getWidth(),canvas.getHeight(), paint);
+
+            paint.setARGB(255, 179, 0, 59);
+            paint.setTextSize(70);
+
+            paint.setTypeface(gameOfThronesTypeface);
+            String gameFinishedText = "Game has finished. Winter is here.";
+            String subText = "tap to proceed";
+
+            Rect gameFinishedTextBounds = new Rect();
+            paint.getTextBounds(gameFinishedText, 0, gameFinishedText.length(), gameFinishedTextBounds);
+
+            canvas.drawText(gameFinishedText, (canvas.getWidth() - gameFinishedTextBounds.width()) / 2, ((canvas.getHeight() - gameFinishedTextBounds.height()) / 2), paint);
+
+            Rect subTextBounds = new Rect();
+            paint.setTextSize(40);
+            paint.getTextBounds(subText, 0, subText.length(), subTextBounds);
+
+            canvas.drawText(subText, (canvas.getWidth() - subTextBounds.width()) / 2, ((canvas.getHeight() + gameFinishedTextBounds.height()) / 2), paint);
+
+        }
+
     }
 
     public void saveGame(Context context) {
 
         GameState gameState = new GameState();
 
-        gameState.timeElapsed = gameStartedTime; //TODO change this
+        gameState.elapsedInTotal = elapsedInTotal;
 
         gameState.homePlayerName = this.homePlayerName;
         gameState.guestPlayerName = this.guestPlayerName;
@@ -440,10 +467,6 @@ public class Game {
                 .createScaledBitmap(BitmapFactory
                                 .decodeResource(resources, R.drawable.player_shadow),
                         360, 360, false);
-
-        timeElapsedPaint.setARGB(200, 179, 0, 59);
-        timeElapsedPaint.setTextSize(85);
-        timeElapsedPaint.setTypeface(gameOfThronesTypeface);
 
         playerWithTurnTextPaint.setARGB(200, 179, 0, 59);
         playerWithTurnTextPaint.setTextSize(60);

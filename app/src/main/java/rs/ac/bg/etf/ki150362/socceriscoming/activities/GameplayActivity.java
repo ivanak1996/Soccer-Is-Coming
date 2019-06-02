@@ -5,13 +5,18 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.gaming.GameStartActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.util.asynctasks.EnterFullScreenAsyncTask;
+import rs.ac.bg.etf.ki150362.socceriscoming.util.sharedpreferences.GameSettingSharedPreferences;
 
 public class GameplayActivity extends AppCompatActivity {
+
+    private boolean isPausedGame = false;
+    private SoccerLogicSurfaceView soccerLogicSurfaceView;
 
     void enterFullScreenMode() {
         getWindow().getDecorView().setSystemUiVisibility(
@@ -37,6 +42,9 @@ public class GameplayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_gameplay);
+
+        View background = findViewById(R.id.layout_gameplay);
+        background.setBackgroundResource(GameSettingSharedPreferences.getTerrainResourceIdPreference(this));
 
         Intent caller = getIntent();
 
@@ -81,22 +89,47 @@ public class GameplayActivity extends AppCompatActivity {
                     }
                 });
 
-        ViewGroup gameplayViewGroup = findViewById(R.id.layout_gameplay);
+        ViewGroup gameplayViewGroup = findViewById(R.id.layout_gameplay_surface);
 
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         gameplayViewGroup.setLayoutParams(params);
 
         SoccerFieldView soccerFieldView = new SoccerFieldView(this);
-        FrameLayout.LayoutParams soccerFieldParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams soccerFieldParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         soccerFieldView.setLayoutParams(soccerFieldParams);
 
-        SoccerLogicSurfaceView soccerLogicSurfaceView = new SoccerLogicSurfaceView(this, soccerFieldView, initStrategy);
-        FrameLayout.LayoutParams soccerLogicSurfaceParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        TextView timeLeftTextView = findViewById(R.id.textView_timeLeft);
+
+
+        /*Handler handler = new Handler();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Intent result = new Intent();
+                result.putExtra(GameStartActivity.EXTRA_FINISHED_GAME_MESSAGE, "Game Finished");
+                setResult(RESULT_OK, result);
+                finish();
+            }
+        });*/
+
+        soccerLogicSurfaceView = new SoccerLogicSurfaceView(this, soccerFieldView, initStrategy, timeLeftTextView/*, handler*/);
+        LinearLayout.LayoutParams soccerLogicSurfaceParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         soccerLogicSurfaceView.setLayoutParams(soccerLogicSurfaceParams);
 
         gameplayViewGroup.addView(soccerFieldView);
         gameplayViewGroup.addView(soccerLogicSurfaceView);
 
+    }
+
+
+    public void pauseGameOnClick(View view) {
+        if(soccerLogicSurfaceView != null) {
+            if(isPausedGame)
+                soccerLogicSurfaceView.resumeGame();
+            else
+                soccerLogicSurfaceView.pauseGame();
+            isPausedGame = !isPausedGame;
+        }
     }
 
 }
