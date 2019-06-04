@@ -22,7 +22,18 @@ public class MatchesViewModel extends AndroidViewModel {
         repository.insert(match);
     }
 
+    public void deleteAllMatches() {repository.deleteAllMatches();}
+
+    public void deleteMatchesForPlayers(String player1, String player2) {
+        repository.deleteMatchesForPlayers(player1, player2);
+    }
+
     public LiveData<List<MatchesTuple>> getAllPlayerPairs() {
         return allPlayerPairs;
     }
+
+    public LiveData<List<Match>> getAllMatchesForPlayers(String player1, String player2) {
+        return repository.getAllMatchesForPlayers(player1, player2);
+    }
+
 }

@@ -1,9 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.results.ResultsActivity">
+    tools:context=".activities.results.ResultsActivity"
+    android:keepScreenOn="true"
+    android:background="@drawable/background_westeros">
 
-</android.support.constraint.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageButton
+                android:onClick="onClickGoBack"
+                android:tint="#FFFFFF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_back"
+                android:backgroundTint="#0000"
+                android:layout_gravity="left"
+                />
+            <ImageButton
+                android:onClick="deleteAllMatches"
+                android:background="@drawable/ic_delete"
+                android:layout_alignParentRight="true"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="10dp" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/results_recycler_empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="#FFFFFF"
+            android:fontFamily="@font/got"
+            android:visibility="gone"
+            android:textSize="28sp"
+            android:gravity="center"
+            android:text="No matches to show" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_results"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+
+
+</android.support.design.widget.CoordinatorLayout>

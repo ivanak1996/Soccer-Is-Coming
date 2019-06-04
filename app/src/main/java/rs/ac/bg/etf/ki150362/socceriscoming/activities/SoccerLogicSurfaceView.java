@@ -13,9 +13,7 @@ import android.view.SurfaceView;
 import android.widget.TextView;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
-import rs.ac.bg.etf.ki150362.socceriscoming.activities.gaming.GameStartActivity;
-
-import static android.app.Activity.RESULT_OK;
+import rs.ac.bg.etf.ki150362.socceriscoming.activities.results.ResultsActivity;
 
 public class SoccerLogicSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -24,7 +22,7 @@ public class SoccerLogicSurfaceView extends SurfaceView implements SurfaceHolder
     private GameRunner runner;
     private Game game;
     private TextView timeLeftTextView;
-    //private Handler gameFinishHandler;
+    private boolean gameSaved = false;
 
     private InitializerStrategy initStrategy;
 
@@ -46,9 +44,18 @@ public class SoccerLogicSurfaceView extends SurfaceView implements SurfaceHolder
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if(game.isGameFinished()) {
-            Intent result = new Intent();
-            result.putExtra(GameStartActivity.EXTRA_FINISHED_GAME_MESSAGE, "Game Finished");
-            ((Activity) getContext()).setResult(RESULT_OK, result);
+//            Intent result = new Intent();
+//            result.putExtra(GameStartActivity.EXTRA_FINISHED_GAME_MESSAGE, "Game Finished");
+//            ((Activity) getContext()).setResult(RESULT_OK, result);
+
+            if(!gameSaved) {
+                gameSaved = true;
+                game.saveGame(getContext());
+            }
+            Intent resultIntent = new Intent(getContext(), ResultsActivity.class);
+            resultIntent.putExtra(ResultsActivity.EXTRA_INTENT_ORIGIN, ResultsActivity.INTENT_ORIGIN_GAME_FINISHED);
+            getContext().startActivity(resultIntent);
+
             ((Activity) getContext()).finish();
         } else
             game.onTouchEvent(event);
@@ -82,7 +89,10 @@ public class SoccerLogicSurfaceView extends SurfaceView implements SurfaceHolder
 
         if (runner != null) {
             runner.finishGame();
-            game.saveGame(getContext());
+            if(!gameSaved) {
+                gameSaved = true;
+                game.saveGame(getContext());
+            }
         }
     }
 

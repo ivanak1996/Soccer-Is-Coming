@@ -43,4 +43,11 @@ public interface MatchDao {
             "GROUP BY player1Name, player2Name")
     LiveData<List<MatchesTuple>> getAllPlayerPairs();
 
+    @Query("DELETE FROM match_table " +
+            "WHERE ( homePlayerName=:player1Name AND guestPlayerName =:player2Name) " +
+            "OR (guestPlayerName =:player1Name AND homePlayerName =:player2Name) ")
+    void deleteMatchesForPlayers(String player1Name, String player2Name);
+
+    @Query("DELETE FROM match_table")
+    void deleteAllMatches();
 }

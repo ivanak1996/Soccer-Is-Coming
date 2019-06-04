@@ -4,6 +4,7 @@
     package="rs.ac.bg.etf.ki150362.socceriscoming">
 
     <application
+        android:name=".SoccerIsComingApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -37,8 +38,10 @@
             android:name=".activities.GameplayActivity"
             android:screenOrientation="landscape" />
         <activity
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
             android:name=".activities.results.ResultsActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:launchMode="singleInstance"/>
     </application>
 
 </manifest>
