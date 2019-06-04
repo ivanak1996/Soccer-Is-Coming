@@ -69,7 +69,7 @@ public class SoccerLogicSurfaceView extends SurfaceView implements SurfaceHolder
 
         Typeface gameOfThronesTypeface = ResourcesCompat.getFont(getContext(), R.font.got);
 
-        game = new Game(soccerFieldView, holder, getResources(), gameOfThronesTypeface, initStrategy);
+        game = new Game(getContext(), soccerFieldView, holder, getResources(), gameOfThronesTypeface, initStrategy);
         runner = new GameRunner(game);
         runner.timeLeftTextView = timeLeftTextView;
 

@@ -11,6 +11,8 @@ import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -18,22 +20,24 @@ import android.view.SurfaceHolder;
 import java.util.LinkedList;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
+import rs.ac.bg.etf.ki150362.socceriscoming.Sounds;
 
 import static java.lang.Math.max;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
+import static rs.ac.bg.etf.ki150362.socceriscoming.Sounds.*;
 
 public class Game {
 
     //  region Collision Strategies
 
     interface CollisionStrategy {
-        void detectCollision(Sprite player1, Sprite player2);
+        boolean detectCollision(Sprite player1, Sprite player2);
     }
 
     private CollisionStrategy staticCollisionStrategy = new CollisionStrategy() {
         @Override
-        public void detectCollision(Sprite player1, Sprite player2) {
+        public boolean detectCollision(Sprite player1, Sprite player2) {
             Rect playerRect = player1.getScreenRect();
             Rect ballRect = player2.getScreenRect();
 
@@ -61,13 +65,17 @@ public class Game {
                 player2.safeSetX(newOpponentX);
                 player2.safeSetY(newOpponentY);
 
+                return true;
+
             }
+
+            return false;
         }
     };
 
     private CollisionStrategy dynamicCollisionStrategy = new CollisionStrategy() {
         @Override
-        public void detectCollision(Sprite player1, Sprite player2) {
+        public boolean detectCollision(Sprite player1, Sprite player2) {
             Rect player1Rect = player1.getScreenRect();
             Rect player2Rect = player2.getScreenRect();
 
@@ -117,7 +125,9 @@ public class Game {
                 player2.setVxVector((tx * dpTan2 + nx * m2));
                 player2.setVyVector((ty * dpTan2 + nx * m2));
 
+                return true;
             }
+            return false;
         }
     };
 
@@ -141,6 +151,13 @@ public class Game {
     Bitmap homeTeamImage, guestTeamImage, ballImage;
     int homePlayerDrawableId;
     int guestPlayerDrawableId;
+
+    // endregion
+
+    // region Sounds
+
+    private SoundPool soundPool;
+    private int[] sounds = new int[Sounds.NUMBER_OF_SOUNDS];
 
     // endregion
 
@@ -173,19 +190,23 @@ public class Game {
 
     // endregion
 
+    private Context context;
     private InitializerStrategy initStrategy;
 
     public boolean isGameFinished() {
         return (leadingScore >= 3);
     }
 
-    public Game(SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources, Typeface typeface, InitializerStrategy initStrategy) {
+    public Game(Context context, SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources, Typeface typeface, InitializerStrategy initStrategy) {
 
         this.soccerFieldView = soccerFieldView;
         this.surfaceHolder = surfaceHolder;
         this.resources = resources;
         this.gameOfThronesTypeface = typeface;
         this.initStrategy = initStrategy;
+        this.context = context;
+
+        soundPool = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
 
         ball = new Ball(soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
         homeTeam = new Team(Player.Position.HOME, soccerFieldView.getSoccerFieldWidth(), soccerFieldView.getSoccerFieldHeight());
@@ -202,6 +223,20 @@ public class Game {
 
     // sets up the game
     public void init() {
+
+        sounds[SOUND_CROWD_CHEER_1] = soundPool.load(context, R.raw.sound_cheer, 1);
+        sounds[SOUND_CROWD_CHEER_2] = soundPool.load(context, R.raw.sound_win, 1);
+        sounds[SOUND_KICK_BALL] = soundPool.load(context, R.raw.ball_kick, 1);
+
+        /*soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                if(SOUND_CROWD_CHEER_2 == sampleId) {
+                    soundPool.play(sampleId, 1,1,1,0,1);
+                }
+            }
+        });*/
+
         initStrategy.init(this);
     }
 
@@ -215,7 +250,8 @@ public class Game {
                     collisionStrategy.detectCollision(player1, player2);
                 }
             }
-            collisionStrategy.detectCollision(player1, ball);
+            if(collisionStrategy.detectCollision(player1, ball))
+                soundPool.play(sounds[SOUND_KICK_BALL], 1,1,1,0,1);
         }
 
         ball.setScreenWidth(soccerFieldView.getSoccerFieldWidth());
@@ -227,11 +263,9 @@ public class Game {
 
         if (turn != null) {
             if (soccerFieldView.getOppositeGoal().contains(ball.getScreenRect().centerX(), ball.getScreenRect().centerY())) {
-                homeTeam.gain();
-                reinit();
+                gain(homeTeam);
             } else if (soccerFieldView.getHomeGoal().contains(ball.getScreenRect().centerX(), ball.getScreenRect().centerY())) {
-                guestTeam.gain();
-                reinit();
+                gain(guestTeam);
             }
             leadingScore = max(homeTeam.getScore(), guestTeam.getScore());
         }
@@ -240,6 +274,13 @@ public class Game {
             switchTurn();
         }
 
+    }
+
+    private void gain(Team team) {
+        team.gain();
+
+        soundPool.play(sounds[SOUND_CROWD_CHEER_2], 1,1,1,0,1);
+        reinit();
     }
 
     // reset all players and ball to the default position
