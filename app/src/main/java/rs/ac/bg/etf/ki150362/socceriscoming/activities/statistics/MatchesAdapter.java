@@ -16,6 +16,7 @@ import rs.ac.bg.etf.ki150362.socceriscoming.room.match.MatchesTuple;
 public class MatchesAdapter extends RecyclerView.Adapter<MatchesAdapter.MatchHolder> {
 
     private List<MatchesTuple> matchesPairs = new ArrayList<>();
+    private OnItemClickListener listener;
 
     @NonNull
     @Override
@@ -57,7 +58,25 @@ public class MatchesAdapter extends RecyclerView.Adapter<MatchesAdapter.MatchHol
             player2NameTextView = itemView.findViewById(R.id.textview_player2);
             player1ScoreTextView = itemView.findViewById(R.id.textview_player1score);
             player2ScoreTextView = itemView.findViewById(R.id.textview_player2score);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if(listener != null)
+                        listener.onItemClick(matchesPairs.get(position));
+                }
+            });
+
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(MatchesTuple matchesTuple);
+    }
+
+    public void setOnClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
 }

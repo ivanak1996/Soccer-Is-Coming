@@ -24,6 +24,8 @@ import rs.ac.bg.etf.ki150362.socceriscoming.util.asynctasks.EnterFullScreenAsync
 public class ResultsActivity extends AppCompatActivity {
 
     public static final String EXTRA_INTENT_ORIGIN = "EXTRA_INTENT_ORIGIN";
+    public static final String EXTRA_PLAYER1_NAME = "EXTRA_PLAYER1_NAME";
+    public static final String EXTRA_PLAYER2_NAME = "EXTRA_PLAYER2_NAME";
 
     public static final String INTENT_ORIGIN_GAME_FINISHED = "INTENT_ORIGIN_GAME_FINISHED";
     public static final String INTENT_ORIGIN_STATISTICS = "INTENT_ORIGIN_STATISTICS";
@@ -80,20 +82,26 @@ public class ResultsActivity extends AppCompatActivity {
                     }
                 });
 
-        if(savedInstanceState == null) {
-            GameState gameState = GameState.reloadGame(this);
-            if (gameState != null && caller.getStringExtra(EXTRA_INTENT_ORIGIN).equals(INTENT_ORIGIN_GAME_FINISHED)) {
-                Match match = new Match(gameState.homePlayerName, gameState.guestPlayerName,
-                        gameState.homePlayerScore, gameState.guestPlayerScore,
-                        gameState.homePlayerDrawableId, gameState.guestPlayerDrawableId,
-                        new Date(System.currentTimeMillis()));
+        if (savedInstanceState == null) {
+            if (INTENT_ORIGIN_GAME_FINISHED.equals(caller.getStringExtra(EXTRA_INTENT_ORIGIN))) {
+                GameState gameState = GameState.reloadGame(this);
+                if (gameState != null && caller.getStringExtra(EXTRA_INTENT_ORIGIN).equals(INTENT_ORIGIN_GAME_FINISHED)) {
+                    Match match = new Match(gameState.homePlayerName, gameState.guestPlayerName,
+                            gameState.homePlayerScore, gameState.guestPlayerScore,
+                            gameState.homePlayerDrawableId, gameState.guestPlayerDrawableId,
+                            new Date(System.currentTimeMillis()));
 
-                matchesViewModel.insert(match);
+                    matchesViewModel.insert(match);
 
-                player1Name = match.getHomePlayerName();
-                player2Name = match.getGuestPlayerName();
+                    player1Name = match.getHomePlayerName();
+                    player2Name = match.getGuestPlayerName();
 
-                GameState.eraseGameState(this);
+                    GameState.eraseGameState(this);
+                }
+            }
+            else {
+                player1Name = caller.getStringExtra(EXTRA_PLAYER1_NAME);
+                player2Name = caller.getStringExtra(EXTRA_PLAYER2_NAME);
             }
         } else {
             player1Name = savedInstanceState.getString(SAVEDINSTANCE_PLAYER_NAME_1);

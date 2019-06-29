@@ -14,6 +14,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
+import rs.ac.bg.etf.ki150362.socceriscoming.activities.results.ResultsActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.room.match.MatchesTuple;
 import rs.ac.bg.etf.ki150362.socceriscoming.room.match.MatchesViewModel;
 import rs.ac.bg.etf.ki150362.socceriscoming.util.asynctasks.EnterFullScreenAsyncTask;
@@ -84,6 +85,18 @@ public class StatisticsActivity extends AppCompatActivity {
                     noContentTextView.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);
                 }
+            }
+        });
+
+        matchesAdapter.setOnClickListener(new MatchesAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(MatchesTuple matchesTuple) {
+                Intent intent = new Intent(StatisticsActivity.this, ResultsActivity.class);
+                intent.putExtra(ResultsActivity.EXTRA_INTENT_ORIGIN, ResultsActivity.INTENT_ORIGIN_STATISTICS);
+                intent.putExtra(ResultsActivity.EXTRA_PLAYER1_NAME, matchesTuple.player1Name);
+                intent.putExtra(ResultsActivity.EXTRA_PLAYER2_NAME, matchesTuple.player2Name);
+
+                startActivity(intent);
             }
         });
 
