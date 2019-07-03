@@ -13,8 +13,10 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
 import rs.ac.bg.etf.ki150362.socceriscoming.room.player.PlayerViewModel;
@@ -48,6 +50,16 @@ public class NewGameFragment extends Fragment {
         TeamSpinnerAdapter adapter2 = new TeamSpinnerAdapter(getActivity(), R.layout.spinner_value_layout, R.id.spinnerTextView, teamNames, images);
 
         spinner2.setAdapter(adapter2);
+
+        Random rand = new Random();
+        int index1 = rand.nextInt(NewGameFragment.images.length);
+        spinner1.setSelection(index1);
+
+        int index2 = rand.nextInt(NewGameFragment.images.length);
+        if(index2 == index1) {
+            index2 = (index2 + 1) % NewGameFragment.images.length;
+        }
+        spinner2.setSelection(index2);
 
         setupAutoCompletePlayerNames(view);
 

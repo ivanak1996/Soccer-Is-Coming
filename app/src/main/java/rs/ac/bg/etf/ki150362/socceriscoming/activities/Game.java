@@ -18,9 +18,12 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
 import rs.ac.bg.etf.ki150362.socceriscoming.Sounds;
+import rs.ac.bg.etf.ki150362.socceriscoming.activities.gaming.GameStartActivity;
+import rs.ac.bg.etf.ki150362.socceriscoming.util.sharedpreferences.GameSettingSharedPreferences;
 
 import static java.lang.Math.max;
 import static java.lang.Math.pow;
@@ -186,6 +189,9 @@ public class Game {
     private long lastTurnSwitchTime;
     long elapsedInTotal = 0;
 
+    public int gameMode;
+    public long robotsDelay;
+
     private LinkedList<Player> players = new LinkedList<>();
 
     // endregion
@@ -193,11 +199,17 @@ public class Game {
     private Context context;
     private InitializerStrategy initStrategy;
 
+    private int numberOfGoalsToEndGame;
+    private int gameLevel;
+
     public boolean isGameFinished() {
-        return (leadingScore >= 3);
+        return (leadingScore >= numberOfGoalsToEndGame || elapsedInTotal > 300000);
     }
 
     public Game(Context context, SoccerFieldView soccerFieldView, SurfaceHolder surfaceHolder, Resources resources, Typeface typeface, InitializerStrategy initStrategy) {
+
+        numberOfGoalsToEndGame = GameSettingSharedPreferences.getNumberOfGoalsPreference(context);
+        gameLevel = GameSettingSharedPreferences.getGameLevelPreference(context);
 
         this.soccerFieldView = soccerFieldView;
         this.surfaceHolder = surfaceHolder;
@@ -274,6 +286,54 @@ public class Game {
             switchTurn();
         }
 
+        if(isRobotsTurn() && System.currentTimeMillis() - lastTurnSwitchTime > robotsDelay) {
+
+            Player candidate = null;
+            float offsetX, offsetY, moveDuration;
+
+            double ballGoalDistance = distanceBetweenPoints(ball.getX(), ball.getY(), soccerFieldView.getHomeGoal().centerX(), soccerFieldView.getHomeGoal().centerY());
+
+            // first try to find the player who can shoot the goal
+            // (if the player is more far away from goal than the ball)
+            for (Player player : guestTeam.getPlayers()) {
+                if(distanceBetweenPoints(player.getX(), player.getY(), soccerFieldView.getHomeGoal().centerX(), soccerFieldView.getHomeGoal().centerY()) > ballGoalDistance) {
+                    candidate = player;
+                    break;
+                }
+            }
+
+            if(candidate == null) {
+                int index = new Random().nextInt(3);
+                candidate = guestTeam.getPlayers().get(index);
+
+                if(candidate.getY() > ball.getY()) {
+                    offsetX = ball.getX() - candidate.getX();
+                    offsetY = ball.getY() - candidate.getY() - ball.getRect().height() - candidate.getRect().height();
+                } else {
+                    offsetX = ball.getX() - candidate.getX();
+                    offsetY = ball.getY() - candidate.getY() + ball.getRect().height() + candidate.getRect().height();
+                }
+            }
+            else {
+                offsetX = ball.getX() - candidate.getX();
+                offsetY = ball.getY() - candidate.getY();
+            }
+
+            moveDuration = new Random().nextInt(20) + 160;
+
+            candidate.setVxVector(1.0f * offsetX / moveDuration);
+            candidate.setVyVector(1.0f * offsetY / moveDuration);
+
+            collisionStrategy = dynamicCollisionStrategy;
+
+            switchTurn();
+        }
+        // TODO: robot check time
+
+    }
+
+    private double distanceBetweenPoints(float x1, float y1, float x2, float y2) {
+        return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
     }
 
     private void gain(Team team) {
@@ -377,6 +437,8 @@ public class Game {
 
         GameState gameState = new GameState();
 
+        gameState.gameMode = this.gameMode;
+
         gameState.elapsedInTotal = elapsedInTotal;
 
         gameState.homePlayerName = this.homePlayerName;
@@ -440,6 +502,8 @@ public class Game {
         int x = (int) event.getX();
         int y = (int) event.getY();
 
+        if(isRobotsTurn()) return;
+
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
 
@@ -483,7 +547,24 @@ public class Game {
         }
     }
 
+    private boolean isRobotsTurn() {
+        return gameMode == GameStartActivity.GAME_MODE_SINGLE_PLAYER && turn == guestTeam;
+    }
+
     private void switchTurn() {
+
+        if(gameMode == GameStartActivity.GAME_MODE_SINGLE_PLAYER ) {
+            // now it is time that the robot gets his turn
+            if(turn == homeTeam) {
+                setTurn(guestTeam);
+                robotsDelay = new Random().nextInt(700) + 1000;
+            }
+            else {
+                setTurn(homeTeam);
+            }
+            return;
+        }
+
         if (turn == null) return;
         if (turn == homeTeam) {
             setTurn(guestTeam);

@@ -13,6 +13,7 @@ import android.view.SurfaceView;
 import android.widget.TextView;
 
 import rs.ac.bg.etf.ki150362.socceriscoming.R;
+import rs.ac.bg.etf.ki150362.socceriscoming.activities.gaming.GameStartActivity;
 import rs.ac.bg.etf.ki150362.socceriscoming.activities.results.ResultsActivity;
 
 public class SoccerLogicSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
@@ -52,6 +53,12 @@ public class SoccerLogicSurfaceView extends SurfaceView implements SurfaceHolder
                 gameSaved = true;
                 game.saveGame(getContext());
             }
+
+            if(game.gameMode == GameStartActivity.GAME_MODE_SINGLE_PLAYER) {
+                ((Activity) getContext()).finish();
+                return true;
+            }
+
             Intent resultIntent = new Intent(getContext(), ResultsActivity.class);
             resultIntent.putExtra(ResultsActivity.EXTRA_INTENT_ORIGIN, ResultsActivity.INTENT_ORIGIN_GAME_FINISHED);
             getContext().startActivity(resultIntent);

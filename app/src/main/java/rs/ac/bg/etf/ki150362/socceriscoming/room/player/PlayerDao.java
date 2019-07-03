@@ -29,5 +29,4 @@ public interface PlayerDao {
 
     @Query("SELECT name from user_table ORDER BY name desc")
     LiveData<List<String>> getAllPlayersNames();
-
 }

@@ -29,6 +29,7 @@ public class GameState implements Serializable {
     public float ballVx, ballVy;
 
     public int homePlayerDrawableId, guestPlayerDrawableId;
+    public int gameMode;
 
     public boolean saveGame(Context context) {
 

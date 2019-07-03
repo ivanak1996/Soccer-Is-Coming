@@ -13,6 +13,8 @@ public class ResumeGameInitializerStrategy extends InitializerStrategy {
 
         if (gameState != null) {
 
+            game.gameMode = gameState.gameMode;
+
             game.homePlayerDrawableId = gameState.homePlayerDrawableId;
             game.guestPlayerDrawableId = gameState.guestPlayerDrawableId;
 

@@ -2,6 +2,8 @@ package rs.ac.bg.etf.ki150362.socceriscoming.activities;
 
 public class NewGameInitializerStrategy extends InitializerStrategy {
 
+    private int gameMode;
+
     private String homePlayerName;
     private String guestPlayerName;
 
@@ -10,6 +12,8 @@ public class NewGameInitializerStrategy extends InitializerStrategy {
 
     @Override
     public void init(Game game) {
+
+        game.gameMode = gameMode;
 
         game.homePlayerName = homePlayerName;
         game.homePlayerDrawableId = homePlayerDrawableId;
@@ -20,7 +24,9 @@ public class NewGameInitializerStrategy extends InitializerStrategy {
         super.init(game);
     }
 
-    public NewGameInitializerStrategy(String homePlayerName, String guestPlayerName, int homePlayerDrawableId, int guestPlayerDrawableId) {
+    public NewGameInitializerStrategy(int gameMode, String homePlayerName, String guestPlayerName, int homePlayerDrawableId, int guestPlayerDrawableId) {
+
+        this.gameMode = gameMode;
 
         this.homePlayerName = homePlayerName;
         this.guestPlayerName = guestPlayerName;

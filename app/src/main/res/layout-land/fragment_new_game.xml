@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <LinearLayout
+                android:id="@+id/layoutPlayer1"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="25dp"
                 android:layout_weight="1"
@@ -46,18 +47,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"  />
 
-                <!--<EditText
-                    android:hint="Player 1 name"
-                    android:gravity="center"
-                    android:fontFamily="cursive"
-                    android:inputType="textCapWords"
-                    android:textColor="#000000"
-                    android:textStyle="bold"
-                    android:textSize="28sp"
-                    android:imeOptions="flagNoExtractUi"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />-->
-
                 <Spinner
                     android:id="@+id/spinner_player1"
                     android:layout_width="match_parent"
@@ -71,6 +60,7 @@
 
             </LinearLayout>
             <LinearLayout
+                android:id="@+id/layoutPlayer2"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="20dp"
                 android:layout_weight="1"
@@ -103,6 +93,33 @@
 
             </LinearLayout>
         </LinearLayout>
+
+
+            <RadioGroup
+                android:id="@+id/radioGroupNewGameMode"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <RadioButton
+                    android:id="@+id/radioSinglePlayer"
+                    android:layout_margin="6dp"
+                    android:onClick="onClickSetRadioNewGameMode"
+                    android:text="single player"
+                    android:fontFamily="@font/got"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <RadioButton
+                    android:id="@+id/radioMultiPlayer"
+                    android:layout_margin="6dp"
+                    android:onClick="onClickSetRadioNewGameMode"
+                    android:checked="true"
+                    android:fontFamily="@font/got"
+                    android:text="multi player"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </RadioGroup>
+
 
         <Button
             android:onClick="playGameOnClick"

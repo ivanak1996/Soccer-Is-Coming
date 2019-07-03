@@ -53,11 +53,12 @@ public class GameplayActivity extends AppCompatActivity {
 
         if(GameStartActivity.GAME_START_STRATEGY_NEWGAME == gameStartStrategy) {
 
+            int gameMode = caller.getIntExtra(GameStartActivity.EXTRA_NEW_GAME_MODE, -1);
             String homePlayerName = caller.getStringExtra(GameStartActivity.EXTRA_HOME_PLAYER_NAME);
             String guestPlayerName = caller.getStringExtra(GameStartActivity.EXTRA_GUEST_PLAYER_NAME);
             int homeDrawableResId = caller.getIntExtra(GameStartActivity.EXTRA_HOME_PLAYER_DRAWABLE, -1);
             int guestDrawableResId = caller.getIntExtra(GameStartActivity.EXTRA_GUEST_PLAYER_DRAWABLE, -1);
-            initStrategy = new NewGameInitializerStrategy(homePlayerName, guestPlayerName, homeDrawableResId, guestDrawableResId);
+            initStrategy = new NewGameInitializerStrategy(gameMode, homePlayerName, guestPlayerName, homeDrawableResId, guestDrawableResId);
 
         } else if(GameStartActivity.GAME_START_STRATEGY_CONTINUE == gameStartStrategy) {
 
