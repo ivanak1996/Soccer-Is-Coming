@@ -11,7 +11,7 @@ public class ResumeGameInitializerStrategy extends InitializerStrategy {
     @Override
     public void init(Game game) {
 
-        if (gameState != null) {
+        if (gameState != null && !game.isGameFinished()) {
 
             game.gameMode = gameState.gameMode;
 

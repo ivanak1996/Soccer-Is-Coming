@@ -201,6 +201,7 @@ public class Game {
 
     private int numberOfGoalsToEndGame;
     private int gameLevel;
+    private long timeBeforeTurnSwitch;
 
     public boolean isGameFinished() {
         return (leadingScore >= numberOfGoalsToEndGame || elapsedInTotal > 300000);
@@ -210,6 +211,7 @@ public class Game {
 
         numberOfGoalsToEndGame = GameSettingSharedPreferences.getNumberOfGoalsPreference(context);
         gameLevel = GameSettingSharedPreferences.getGameLevelPreference(context);
+        timeBeforeTurnSwitch = (7500 - gameLevel*2000);
 
         this.soccerFieldView = soccerFieldView;
         this.surfaceHolder = surfaceHolder;
@@ -282,7 +284,7 @@ public class Game {
             leadingScore = max(homeTeam.getScore(), guestTeam.getScore());
         }
 
-        if (System.currentTimeMillis() - lastTurnSwitchTime > 5000) {
+        if (System.currentTimeMillis() - lastTurnSwitchTime > timeBeforeTurnSwitch) {
             switchTurn();
         }
 
@@ -557,7 +559,8 @@ public class Game {
             // now it is time that the robot gets his turn
             if(turn == homeTeam) {
                 setTurn(guestTeam);
-                robotsDelay = new Random().nextInt(700) + 1000;
+                //robotsDelay = new Random().nextInt(700) + 1000;
+                robotsDelay = new Random().nextInt((int) timeBeforeTurnSwitch/7) + timeBeforeTurnSwitch/5;
             }
             else {
                 setTurn(homeTeam);

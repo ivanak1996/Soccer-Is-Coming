@@ -63,22 +63,14 @@ public class GameSettingSharedPreferences {
 
     public static int getNumberOfGoalsPreference(Context context) {
         SharedPreferences prefs = getSharedPreferences(context);
-        int index = prefs.getInt(PREFERENCE_GOALSNUMBER, -1);
-        try{
-            return goalNumberValues[index];
-        } catch (Exception e) {
-            return defaultGoalsNumber;
-        }
+        int value = prefs.getInt(PREFERENCE_GOALSNUMBER, -1);
+        return value != -1 ? value : defaultGoalsNumber;
     }
 
     public static int getGameLevelPreference(Context context) {
         SharedPreferences prefs = getSharedPreferences(context);
-        int index = prefs.getInt(PREFERENCE_GAMELEVEL, -1);
-        try{
-            return gameLevelsValues[index];
-        } catch (Exception e) {
-            return defaultGameLevel;
-        }
+        int value = prefs.getInt(PREFERENCE_GAMELEVEL, -1);
+        return value != -1 ? value : defaultGameLevel;
     }
 
 }

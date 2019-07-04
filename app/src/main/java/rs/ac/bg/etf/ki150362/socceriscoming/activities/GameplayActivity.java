@@ -62,7 +62,15 @@ public class GameplayActivity extends AppCompatActivity {
 
         } else if(GameStartActivity.GAME_START_STRATEGY_CONTINUE == gameStartStrategy) {
 
-            initStrategy = new ResumeGameInitializerStrategy(GameState.reloadGame(this));
+            GameState reloadedState = GameState.reloadGame(this);
+            if(reloadedState == null) {
+                Intent intent = new Intent();
+                intent.putExtra("message", "No started games to resume.");
+                setResult(RESULT_CANCELED, intent);
+                finish();
+            } else {
+                initStrategy = new ResumeGameInitializerStrategy(reloadedState);
+            }
 
         } else {
             // TODO: not valid

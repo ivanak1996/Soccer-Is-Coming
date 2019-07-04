@@ -101,8 +101,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         SharedPreferences.Editor editor = getSharedPreferences(PREFERENCES_GOT_SETTINGS, MODE_PRIVATE).edit();
         editor.putString(PREFERENCE_TERRAIN, spinner.getSelectedItem().toString());
-        editor.putInt(PREFERENCE_GAMELEVEL, gameLevelRadioGroup.getCheckedRadioButtonId());
-        editor.putInt(PREFERENCE_GOALSNUMBER, goalsNumberRadioGroup.getCheckedRadioButtonId());
+        editor.putInt(PREFERENCE_GAMELEVEL, getGameLevelForRadioButtonId(gameLevelRadioGroup.getCheckedRadioButtonId()));
+        editor.putInt(PREFERENCE_GOALSNUMBER, getGoalsNumberForRadioButtonId(goalsNumberRadioGroup.getCheckedRadioButtonId()));
         editor.apply();
 
     }
@@ -125,13 +125,16 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
 
-        if (gameLevelValue != -1) {
-            gameLevelRadioGroup.check(gameLevelValue);
-        }
+        gameLevelRadioGroup.check(getRadioButtonIdForGameLevel(gameLevelValue));
+        goalsNumberRadioGroup.check(getRadioButtonIdForGoalsNumber(goalsValue));
 
-        if (goalsValue != -1) {
-            goalsNumberRadioGroup.check(goalsValue);
-        }
+//        if (gameLevelValue != -1) {
+//            gameLevelRadioGroup.check(gameLevelValue);
+//        }
+//
+//        if (goalsValue != -1) {
+//            goalsNumberRadioGroup.check(goalsValue);
+//        }
     }
 
     private void initSpinner() {
@@ -141,4 +144,37 @@ public class SettingsActivity extends AppCompatActivity {
         spinner.setAdapter(adapter);
 
     }
+
+    private static int getRadioButtonIdForGameLevel(int level) {
+        switch (level) {
+            case 2: return R.id.radioLevelMedium;
+            case 3: return R.id.radioLevelHard;
+            default: return R.id.radioLevelEasy;
+        }
+    }
+
+    private static int getGameLevelForRadioButtonId(int buttonId) {
+        switch (buttonId) {
+            case R.id.radioLevelMedium: return 2;
+            case R.id.radioLevelHard: return 3;
+            default: return 1;
+        }
+    }
+
+    private static int getRadioButtonIdForGoalsNumber(int number) {
+        switch (number) {
+            case 5: return R.id.radio5goals;
+            case 10: return R.id.radio10goals;
+            default: return R.id.radio3goals;
+        }
+    }
+
+    private static int getGoalsNumberForRadioButtonId(int buttonId) {
+        switch (buttonId) {
+            case R.id.radio5goals: return 5;
+            case R.id.radioLevelHard: return 10;
+            default: return 3;
+        }
+    }
+
 }

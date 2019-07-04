@@ -79,7 +79,6 @@ public class GameStartActivity extends AppCompatActivity {
         if(playerViewModel == null) {
             playerViewModel = ViewModelProviders.of(this).get(PlayerViewModel.class);
         }
-        onClickSetRadioNewGameMode(null);
     }
 
     @Override
@@ -203,6 +202,10 @@ public class GameStartActivity extends AppCompatActivity {
 
         if(resultCode == RESULT_CANCELED) {
             setFragmentGameStart(null);
+            String msg = data.getStringExtra("message");
+            if(msg != null) {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            }
         }
         if(requestCode == REQ_CODE_NEW_GAME && resultCode == RESULT_OK) {
             Toast.makeText(this, "Game finished", Toast.LENGTH_SHORT).show();
